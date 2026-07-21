@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bông Tuyết Nhỏ - Mixue Mini App</title>
+<style>
+  :root{
+    --red: #E2231A;
+    --red-dark: #C21810;
+    --red-soft: #FDEAE8;
+    --ink: #1C1C1E;
+    --sub: #8A8A8E;
+    --line: #EFEFF1;
+    --page-bg: #F4F4F6;
+    --card: #FFFFFF;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: #DADCE0;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    min-height:100vh;
+    padding:28px 12px;
+  }
+  button{font-family:inherit;cursor:pointer;}
+
+  /* ---------- phone frame ---------- */
+  .device{
+    width:390px;
+    max-width:100%;
+    height:844px;
+    background:#000;
+    border-radius:52px;
+    padding:12px;
+    box-shadow: 0 30px 60px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.05) inset;
+    position:relative;
+  }
+  .screen{
+    width:100%;
+    height:100%;
+    background:var(--page-bg);
+    border-radius:40px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+  .notch{
+    position:absolute;
+    top:12px; left:50%; transform:translateX(-50%);
+    width:120px; height:26px;
+    background:#000;
+    border-radius:14px;
+    z-index:100;
+  }
+
+  /* ---------- header ---------- */
+  .app-header{
+    flex-shrink:0;
+    background: linear-gradient(180deg,#EE3A2F 0%, var(--red) 55%, var(--red-dark) 100%);
+    color:#fff;
+    position:relative;
+    z-index:20;
+  }
+  .status-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:16px 24px 2px;
+    font-size:14px;
+    font-weight:600;
+    letter-spacing:.2px;
+  }
+  .status-row .icons{display:flex;align-items:center;gap:5px;}
+  .profile-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px 16px 18px;
+    gap:10px;
+  }
+  .profile-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:none;
+    border:none;
+    color:#fff;
+    padding:0;
+    text-align:left;
+  }
+  .avatar{
+    width:46px;height:46px;border-radius:50%;
+    background:#FFD9B3;
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;
+    border:2px solid rgba(255,255,255,.55);
+    flex-shrink:0;
+  }
+  .profile-text{display:flex;flex-direction:column;gap:2px;}
+  .profile-name{font-weight:700;font-size:16.5px;line-height:1.1;}
+  .profile-tier{font-size:12.5px;opacity:.92;line-height:1.1;}
+  .header-actions{display:flex;gap:8px;flex-shrink:0;}
+  .icon-btn{
+    width:32px;height:32px;border-radius:50%;
+    background:rgba(255,255,255,.2);
+    border:none;color:#fff;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .icon-btn.pill{width:auto;padding:0 10px;border-radius:16px;gap:3px;}
+
+  /* ---------- scroll area ---------- */
+  .scroll-area{
+    flex:1;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .scroll-area::-webkit-scrollbar{display:none;}
+
+  /* ---------- membership banner ---------- */
+  .banner-wrap{padding:14px 14px 6px;}
+  .membership-banner{
+    position:relative;
+    border-radius:20px;
+    overflow:hidden;
+    height:250px;
+    background:
+      radial-gradient(120% 90% at 75% 15%, #8B7FD1 0%, #5C6FC7 32%, #2450AE 60%, #123A8F 100%);
+    border:none;
+    display:block;
+    width:100%;
+    padding:0;
+  }
+  .membership-banner .snowfield{
+    position:absolute;left:0;right:0;bottom:0;height:70px;
+    background:linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(235,244,255,.9) 60%, #EAF3FF 100%);
+  }
+  .membership-banner .brand-row{
+    position:absolute;top:14px;left:16px;
+    display:flex;align-items:center;gap:7px;
+    color:#fff;font-weight:800;font-size:15px;letter-spacing:.5px;
+  }
+  .membership-banner .brand-row small{
+    display:block;font-size:7px;font-weight:600;letter-spacing:.5px;opacity:.85;margin-top:1px;
+  }
+  .membership-banner .headline{
+    position:absolute;top:56px;left:16px;right:120px;
+    color:#fff;
+    text-align:left;
+  }
+  .membership-banner .headline .l1{
+    font-size:25px;font-weight:900;font-style:italic;line-height:1.05;
+    color:#FFE066;
+    text-shadow: 0 2px 0 rgba(0,0,0,.15);
+    display:block;
+  }
+  .membership-banner .headline .l2{
+    font-size:23px;font-weight:900;font-style:italic;line-height:1.15;
+    color:#fff;
+    display:block;
+    margin-top:2px;
+  }
+  .membership-banner .app-pill{
+    position:absolute; left:16px; top:150px;
+    background:#fff; color:#3350B0;
+    font-size:11.5px; font-weight:800; letter-spacing:.4px;
+    padding:6px 14px; border-radius:20px;
+  }
+  .membership-banner .mascot{position:absolute; right:6px; top:34px; width:150px; height:150px;}
+  .membership-banner .tree{position:absolute; bottom:8px; opacity:.95;}
+
+  /* ---------- quick actions grid ---------- */
+  .quick-actions{
+    background:var(--card);
+    margin:12px 14px;
+    border-radius:18px;
+    padding:18px 6px 8px;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    row-gap:16px;
+  }
+  .qa-item{
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    background:none;border:none;color:var(--ink);
+    font-size:12px;font-weight:500;line-height:1.25;text-align:center;
+    padding:0 2px;
+  }
+  .qa-icon-circle{
+    width:50px;height:50px;border-radius:50%;
+    background:var(--red-soft);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--red);
+  }
+
+  /* ---------- OA follow banner ---------- */
+  .oa-banner{
+    background:#FBE8E6;
+    margin:0 14px 18px;
+    border-radius:16px;
+    padding:14px 14px 12px;
+  }
+  .oa-banner .oa-lead{
+    font-size:13px;color:#6b3b36;font-weight:500;
+    padding-bottom:10px;margin-bottom:10px;
+    border-bottom:1px solid rgba(0,0,0,.06);
+  }
+  .oa-banner .oa-row{display:flex;align-items:center;gap:10px;}
+  .oa-avatar{
+    width:38px;height:38px;border-radius:50%;
+    background:var(--red);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;position:relative;
+  }
+  .oa-name{flex:1;font-size:14.5px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:4px;}
+  .follow-btn{
+    background:var(--red);color:#fff;border:none;
+    font-size:13px;font-weight:700;
+    padding:8px 18px;border-radius:20px;flex-shrink:0;
+  }
+  .follow-btn.followed{background:#fff;color:var(--sub);border:1px solid #ddd;}
+
+  /* ---------- generic sections ---------- */
+  .section{padding:0 14px 8px;}
+  .section-header{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:12px;
+  }
+  .section-title{font-size:19px;font-weight:800;color:var(--ink);}
+  .section-link{background:none;border:none;color:var(--red);font-size:13.5px;font-weight:600;padding:0;}
+  .h-scroll{
+    display:flex;gap:11px;overflow-x:auto;padding-bottom:6px;margin:0 -14px;padding-left:14px;padding-right:14px;
+    scrollbar-width:none;
+  }
+  .h-scroll::-webkit-scrollbar{display:none;}
+
+  .product-card{
+    flex:0 0 144px;
+    background:var(--card);
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow:0 1px 6px rgba(0,0,0,.06);
+    text-align:left;
+    border:none;
+    padding:0;
+    display:flex;flex-direction:column;
+  }
+  .product-image{
+    height:144px;position:relative;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .product-image svg{width:100%;height:100%;}
+  .ice-tag{
+    position:absolute;top:7px;left:7px;
+    background:rgba(255,255,255,.9);
+    color:#0B4F9E;font-size:8.5px;font-weight:800;
+    padding:2px 6px;border-radius:5px;
+    letter-spacing:.3px;
+  }
+  .product-info{padding:9px 10px 10px;flex:1;display:flex;flex-direction:column;justify-content:space-between;}
+  .product-name{
+    font-size:12.8px;font-weight:600;color:var(--ink);
+    line-height:1.28;
+    min-height:33px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .product-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
+  .price{font-weight:800;font-size:13.5px;color:var(--ink);}
+  .add-btn{
+    width:24px;height:24px;border-radius:50%;
+    background:var(--red);color:#fff;border:none;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .stepper{display:flex;align-items:center;gap:6px;}
+  .stepper button{
+    width:22px;height:22px;border-radius:50%;border:1.4px solid var(--red);
+    background:#fff;color:var(--red);display:flex;align-items:center;justify-content:center;
+  }
+  .stepper .qty{font-size:13px;font-weight:700;min-width:14px;text-align:center;}
+
+  /* ---------- news ---------- */
+  .news-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .news-card{background:none;border:none;padding:0;text-align:left;color:inherit;}
+  .news-thumb{width:100%;height:96px;border-radius:12px;overflow:hidden;margin-bottom:8px;}
+  .news-thumb svg{width:100%;height:100%;}
+  .news-title{font-size:13px;font-weight:700;color:var(--ink);line-height:1.3;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:6px;}
+  .news-meta{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--sub);}
+  .news-meta .views{display:flex;align-items:center;gap:3px;}
+
+  /* ---------- bottom nav ---------- */
+  .bottom-nav{
+    flex-shrink:0;
+    display:flex;
+    background:#fff;
+    border-top:1px solid var(--line);
+    padding:9px 0 12px;
+    position:relative;
+    z-index:20;
+  }
+  .nav-item{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+    background:none;border:none;color:var(--sub);font-size:10.5px;font-weight:500;
+    position:relative;
+  }
+  .nav-item.active{color:var(--red);}
+  .nav-badge{
+    position:absolute;top:-4px;right:20%;
+    background:var(--red);color:#fff;font-size:9px;font-weight:700;
+    min-width:15px;height:15px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;padding:0 3px;
+  }
+
+  /* ---------- toast ---------- */
+  .toast{
+    position:absolute;left:50%;bottom:92px;
+    transform:translateX(-50%) translateY(12px);
+    background:rgba(28,28,30,.92);color:#fff;
+    padding:10px 18px;border-radius:22px;font-size:13px;font-weight:500;
+    opacity:0;pointer-events:none;transition:opacity .22s ease, transform .22s ease;
+    white-space:nowrap;z-index:200;max-width:80%;overflow:hidden;text-overflow:ellipsis;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="device">
+  <div class="notch"></div>
+  <div class="screen">
+
+    <!-- ===== HEADER ===== -->
+    <div class="app-header">
+      <div class="status-row">
+        <span>3:59</span>
+        <span class="icons">
+          <svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="#fff"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="#fff"/><rect x="9" y="2.5" width="3" height="8.5" rx="0.5" fill="#fff"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="#fff" opacity=".55"/></svg>
+          <svg width="15" height="11" viewBox="0 0 15 11" fill="none"><path d="M7.5 9.2a1.2 1.2 0 100 2.4 1.2 1.2 0 000-2.4z" fill="#fff"/><path d="M3.7 6.6a5.3 5.3 0 017.6 0l-1.3 1.3a3.5 3.5 0 00-5 0L3.7 6.6z" fill="#fff"/><path d="M0.9 3.8a9.2 9.2 0 0113.2 0L12.8 5A7.4 7.4 0 002.2 5L0.9 3.8z" fill="#fff" opacity=".7"/></svg>
+          <svg width="24" height="11" viewBox="0 0 24 11" fill="none"><rect x="0.5" y="0.5" width="20" height="10" rx="2.5" stroke="#fff" opacity=".6"/><rect x="2" y="2" width="17" height="7" rx="1.2" fill="#fff"/><rect x="21.5" y="3.5" width="1.6" height="4" rx="0.8" fill="#fff" opacity=".6"/></svg>
+        </span>
+      </div>
+      <div class="profile-row">
+        <button class="profile-left" onclick="soon('Trang cá nhân')">
+          <span class="avatar">🙂</span>
+          <span class="profile-text">
+            <span class="profile-name">Nguyễn Vũ</span>
+            <span class="profile-tier">Bông Tuyết Nhỏ &nbsp;|&nbsp; 0 điểm</span>
+          </span>
+        </button>
+        <div class="header-actions">
+          <button class="icon-btn" onclick="soon('Menu thêm')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+          </button>
+          <button class="icon-btn" onclick="soon('Đóng ứng dụng')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SCROLLABLE CONTENT ===== -->
+    <div class="scroll-area" id="scrollArea">
+
+      <!-- membership banner -->
+      <div class="banner-wrap">
+        <button class="membership-banner" onclick="soon('Thẻ hội viên')">
+          <svg class="tree" style="left:8px;bottom:6px;width:56px;height:70px" viewBox="0 0 56 70" fill="none"><path d="M28 4 L44 34 H12 Z" fill="#3E8E7E"/><path d="M28 20 L40 46 H16 Z" fill="#3E8E7E"/><rect x="24" y="46" width="8" height="10" fill="#7A5A44"/><circle cx="18" cy="30" r="3" fill="#fff" opacity=".8"/><circle cx="36" cy="40" r="2.5" fill="#fff" opacity=".8"/></svg>
+          <svg class="tree" style="right:14px;bottom:2px;width:40px;height:50px" viewBox="0 0 56 70" fill="none"><path d="M28 4 L44 34 H12 Z" fill="#3E8E7E"/><path d="M28 20 L40 46 H16 Z" fill="#3E8E7E"/><rect x="24" y="46" width="8" height="10" fill="#7A5A44"/></svg>
+          <div class="brand-row">
+            <svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="9" r="5.5" fill="#fff"/><circle cx="12" cy="17.5" r="4" fill="#fff"/></svg>
+            MIXUE
+            <small style="margin-left:2px;">ICE CREAM &amp; TEA</small>
+          </div>
+          <div class="headline">
+            <span class="l1">THẺ HỘI VIÊN</span>
+            <span class="l2">BÔNG TUYẾT NHỎ</span>
+          </div>
+          <span class="app-pill">ZALO MINI APP</span>
+          <svg class="mascot" viewBox="0 0 150 150" fill="none">
+            <g opacity=".9">
+              <path d="M75 8 L75 70" stroke="#fff" stroke-width="3"/>
+              <path d="M75 20 L60 10 M75 20 L90 10 M75 40 L58 34 M75 40 L92 34" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+              <path d="M40 45 L15 38 M40 45 L20 60 M110 45 L135 38 M110 45 L130 60" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+            </g>
+            <circle cx="75" cy="95" r="46" fill="#fff"/>
+            <circle cx="59" cy="82" r="5.5" fill="#2B3A67"/>
+            <circle cx="91" cy="82" r="5.5" fill="#2B3A67"/>
+            <path d="M75 90 L69 102 L81 102 Z" fill="#FFA53E"/>
+            <path d="M58 108 Q75 118 92 108" stroke="#2B3A67" stroke-width="3" stroke-linecap="round" fill="none"/>
+            <circle cx="48" cy="98" r="6" fill="#FF9E9E" opacity=".6"/>
+            <circle cx="102" cy="98" r="6" fill="#FF9E9E" opacity=".6"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- quick actions -->
+      <div class="quick-actions">
+        <button class="qa-item" onclick="soon('Tích điểm')">
+          <span class="qa-icon-circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7l1.5 3 3.3.3-2.5 2.2.8 3.3L12 14l-3.1 1.8.8-3.3-2.5-2.2 3.3-.3z" fill="currentColor" stroke="none"/></svg></span>
+          Tích điểm
+        </button>
+        <button class="qa-item" onclick="soon('Đổi thưởng')">
+          <span class="qa-icon-circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M4 9h16M12 9v11"/><path d="M12 9c-2.2 0-3.5-1.2-3.5-2.6C8.5 5 9.6 4 11 4c1.6 0 1.9 2.4 1 5zM12 9c2.2 0 3.5-1.2 3.5-2.6C15.5 5 14.4 4 13 4c-1.6 0-1.9 2.4-1 5z"/></svg></span>
+          Đổi thưởng
+        </button>
+        <button class="qa-item" onclick="soon('Đặt hàng')">
+          <span class="qa-icon-circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 8h12l-1 12H7z"/><path d="M9 8a3 3 0 016 0"/></svg></span>
+          Đặt hàng
+        </button>
+        <button class="qa-item" onclick="soon('Liên hệ')">
+          <span class="qa-icon-circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h4l2 5-2.5 1.5a11 11 0 005 5L14 14l5 2v4c0 1-1 2-2 2C10 22 2 14 2 7c0-1 1-2 2-2z"/><path d="M15 9l2-2 2 2M17 7v5"/></svg></span>
+          Liên hệ
+        </button>
+        <button class="qa-item" onclick="soon('Tin tức')">
+          <span class="qa-icon-circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h11v11a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><path d="M15 9h5v9a2 2 0 01-2 2h-3M8 9h4M8 12.5h4M8 16h2"/></svg></span>
+          Tin tức
+        </button>
+        <button class="qa-item" onclick="soon('Chat ngay')">
+          <span class="qa-icon-circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4a8 8 0 00-6.9 12.1L4 20l4-1a8 8 0 104-15z"/></svg></span>
+          Chat ngay
+        </button>
+        <button class="qa-item" onclick="soon('Quyền lợi thành viên')">
+          <span class="qa-icon-circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9l3 2 5-6 5 6 3-2-1.5 9h-13z"/></svg></span>
+          Quyền lợi thành viên
+        </button>
+        <button class="qa-item" onclick="soon('Lịch sử mua hàng')">
+          <span class="qa-icon-circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v3h3M9 11h6M9 14h6M9 17h3"/><path d="M9 8.5l1 1 2-2" stroke-width="1.5"/></svg></span>
+          Lịch sử mua hàng
+        </button>
+      </div>
+
+      <!-- OA follow banner -->
+      <div class="oa-banner">
+        <div class="oa-lead">Quan tâm OA để nhận các chương trình đặc quyền ưu đãi</div>
+        <div class="oa-row">
+          <span class="oa-avatar">
+            <svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="9" r="5.5" fill="#fff"/><circle cx="12" cy="17.5" r="4" fill="#fff"/></svg>
+          </span>
+          <span class="oa-name">Hội Viên Mixue
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="#3897F0"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <button class="follow-btn" id="followBtn" onclick="toggleFollow()">Quan tâm</button>
+        </div>
+      </div>
+
+      <!-- KEM -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title">Kem</span>
+          <button class="section-link" onclick="soon('Danh mục Kem')">Tất cả</button>
+        </div>
+        <div class="h-scroll" id="kemScroll"></div>
+      </div>
+
+      <!-- TRÀ SỮA -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title">Trà sữa</span>
+          <button class="section-link" onclick="soon('Danh mục Trà sữa')">Tất cả</button>
+        </div>
+        <div class="h-scroll" id="teaScroll"></div>
+      </div>
+
+      <!-- TIN TỨC -->
+      <div class="section" style="padding-bottom:20px;">
+        <div class="section-header">
+          <span class="section-title">Tin tức</span>
+          <button class="section-link" onclick="soon('Xem thêm tin tức')">Xem thêm</button>
+        </div>
+        <div class="news-grid" id="newsGrid"></div>
+      </div>
+
+    </div>
+
+    <!-- ===== BOTTOM NAV ===== -->
+    <div class="bottom-nav">
+      <button class="nav-item active" onclick="setTab(this)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/></svg>
+        Trang chủ
+      </button>
+      <button class="nav-item" onclick="soon('Danh mục')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="2.2" rx="1"/><rect x="4" y="11" width="16" height="2.2" rx="1"/><rect x="4" y="17" width="16" height="2.2" rx="1"/></svg>
+        Danh mục
+      </button>
+      <button class="nav-item" onclick="soon('Giỏ hàng')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8h12l-1 12H7z"/><path d="M9 8a3 3 0 016 0"/></svg>
+        Giỏ hàng
+        <span class="nav-badge" id="cartBadge" style="display:none;">0</span>
+      </button>
+      <button class="nav-item" onclick="soon('Tin nhắn')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4a8 8 0 00-6.9 12.1L4 20l4-1a8 8 0 104-15z"/></svg>
+        Tin nhắn
+      </button>
+      <button class="nav-item" onclick="soon('Cá nhân')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c1.2-4 4.2-6 7-6s5.8 2 7 6"/></svg>
+        Cá nhân
+      </button>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+</div>
+
+<script>
+  /* ---------------- toast ---------------- */
+  let toastTimer;
+  function toast(msg){
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=> el.classList.remove('show'), 1700);
+  }
+  function soon(feature){
+    toast('Tính năng "' + feature + '" đang được phát triển');
+  }
+
+  /* ---------------- nav tabs ---------------- */
+  function setTab(el){
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('scrollArea').scrollTo({top:0, behavior:'smooth'});
+  }
+
+  /* ---------------- follow toggle ---------------- */
+  function toggleFollow(){
+    const btn = document.getElementById('followBtn');
+    const following = btn.classList.toggle('followed');
+    btn.textContent = following ? 'Đã quan tâm' : 'Quan tâm';
+    toast(following ? 'Đã quan tâm Hội Viên Mixue' : 'Đã bỏ quan tâm');
+  }
+
+  /* ---------------- cart ---------------- */
+  const cart = {};
+  function updateCartBadge(){
+    const total = Object.values(cart).reduce((a,b)=>a+b,0);
+    const badge = document.getElementById('cartBadge');
+    badge.textContent = total;
+    badge.style.display = total > 0 ? 'flex' : 'none';
+  }
+  function addToCart(id){
+    cart[id] = (cart[id]||0) + 1;
+    renderStepper(id);
+    updateCartBadge();
+  }
+  function changeQty(id, delta){
+    cart[id] = Math.max(0, (cart[id]||0) + delta);
+    renderStepper(id);
+    updateCartBadge();
+  }
+  function renderStepper(id){
+    const holder = document.getElementById('qty-' + id);
+    const qty = cart[id] || 0;
+    if(qty <= 0){
+      holder.innerHTML = '<button class="add-btn" onclick="event.stopPropagation();addToCart(\''+id+'\')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>';
+    } else {
+      holder.innerHTML = '<span class="stepper">'
+        + '<button onclick="event.stopPropagation();changeQty(\''+id+'\',-1)">−</button>'
+        + '<span class="qty">'+qty+'</span>'
+        + '<button onclick="event.stopPropagation();changeQty(\''+id+'\',1)">+</button>'
+        + '</span>';
+    }
+  }
+
+  /* ---------------- icy cup illustration ---------------- */
+  function cupSVG(opts){
+    // opts: {cupFill, swirlColor, toppingColor, toppingType}
+    const toppings = {
+      strawberry: '<circle cx="42" cy="46" r="5" fill="#E14B3E"/><circle cx="98" cy="50" r="4" fill="#E14B3E"/><circle cx="70" cy="38" r="3.4" fill="#E14B3E"/><path d="M30 60 Q70 40 110 60" stroke="#E14B3E" stroke-width="3" fill="none" opacity=".7"/>',
+      oreo: '<rect x="34" y="42" width="12" height="12" rx="2" fill="#3B2A22" transform="rotate(12 40 48)"/><rect x="90" y="44" width="12" height="12" rx="2" fill="#3B2A22" transform="rotate(-10 96 50)"/><rect x="62" y="36" width="11" height="11" rx="2" fill="#3B2A22" transform="rotate(6 67 41)"/>',
+      peach: '<circle cx="45" cy="44" r="6" fill="#F2916B"/><circle cx="95" cy="48" r="5.5" fill="#F5A879"/><path d="M32 58 Q70 42 108 58" stroke="#F2916B" stroke-width="3" fill="none" opacity=".7"/>',
+      kiwi: '<circle cx="44" cy="45" r="4" fill="#2E2E2E"/><circle cx="56" cy="40" r="3" fill="#2E2E2E"/><circle cx="90" cy="47" r="4" fill="#2E2E2E"/><circle cx="80" cy="39" r="3" fill="#2E2E2E"/>',
+      grass: '<rect x="30" y="40" width="10" height="10" fill="#2B2B2B" transform="rotate(20 35 45)"/><rect x="95" y="42" width="10" height="10" fill="#2B2B2B" transform="rotate(-15 100 47)"/><rect x="63" y="34" width="9" height="9" fill="#2B2B2B" transform="rotate(8 67 38)"/>'
+    };
+    return '<svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">'
+      + '<rect width="140" height="140" fill="url(#g'+opts.id+')"/>'
+      + '<defs><linearGradient id="g'+opts.id+'" x1="0" y1="0" x2="0" y2="1">'
+      +   '<stop offset="0" stop-color="#4FA6E8"/><stop offset="1" stop-color="#0B63C2"/>'
+      + '</linearGradient></defs>'
+      + '<circle cx="20" cy="100" r="26" fill="#ffffff" opacity=".10"/>'
+      + '<circle cx="120" cy="30" r="20" fill="#ffffff" opacity=".10"/>'
+      + '<path d="M50 130 Q70 100 90 130 Z" fill="' + opts.cupFill + '"/>'
+      + '<path d="M55 100 h30 v30 h-30 Z" fill="' + opts.cupFill + '"/>'
+      + '<path d="M45 100 Q70 58 95 100 Q70 112 45 100Z" fill="' + opts.swirlColor + '"/>'
+      + '<path d="M55 78 Q70 50 85 78 Q70 88 55 78Z" fill="' + opts.swirlColor + '"/>'
+      + (toppings[opts.toppingType] || '')
+      + '<g opacity=".95">'
+      +   '<circle cx="70" cy="118" r="9" fill="#fff"/>'
+      +   '<path d="M70 111l1.6 3.4 3.7.3-2.8 2.4.9 3.6-3.4-2-3.4 2 .9-3.6-2.8-2.4 3.7-.3z" fill="#F2A73A"/>'
+      + '</g>'
+      + '</svg>';
+  }
+
+  function teaSVG(opts){
+    const bits = {
+      strawberry: '<rect x="40" y="30" width="16" height="20" rx="3" fill="#E14B3E"/><rect x="88" y="34" width="16" height="18" rx="3" fill="#E14B3E"/>',
+      kiwi: '<circle cx="46" cy="38" r="9" fill="#8FBF3F"/><circle cx="46" cy="38" r="3" fill="#fff"/><circle cx="94" cy="42" r="8" fill="#8FBF3F"/>',
+      black: '<rect x="42" y="34" width="12" height="12" fill="#2B2B2B" transform="rotate(15 48 40)"/><rect x="86" y="38" width="12" height="12" fill="#2B2B2B" transform="rotate(-12 92 44)"/><rect x="64" y="28" width="11" height="11" fill="#2B2B2B" transform="rotate(8 69 33)"/>'
+    };
+    return '<svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">'
+      + '<rect width="140" height="140" fill="url(#t'+opts.id+')"/>'
+      + '<defs><linearGradient id="t'+opts.id+'" x1="0" y1="0" x2="0" y2="1">'
+      +   '<stop offset="0" stop-color="#4FA6E8"/><stop offset="1" stop-color="#0B63C2"/>'
+      + '</linearGradient></defs>'
+      + '<circle cx="18" cy="95" r="24" fill="#ffffff" opacity=".10"/>'
+      + '<path d="M48 60 h44 v55 a6 6 0 01-6 6 h-32 a6 6 0 01-6-6z" fill="'+opts.liquid+'" opacity=".93"/>'
+      + '<rect x="46" y="55" width="48" height="10" rx="4" fill="#eaf6ff" opacity=".9"/>'
+      + '<rect x="66" y="18" width="6" height="42" fill="#ffffff" opacity=".85"/>'
+      + bits[opts.bitType]
+      + '<g opacity=".95">'
+      +   '<circle cx="70" cy="112" r="8" fill="#fff"/>'
+      +   '<path d="M70 106l1.4 3 3.2.3-2.4 2.1.8 3.1-3-1.7-3 1.7.8-3.1-2.4-2.1 3.2-.3z" fill="#F2A73A"/>'
+      + '</g>'
+      + '</svg>';
+  }
+
+  /* ---------------- product data ---------------- */
+  const kemItems = [
+    {id:'kem1', name:'Lucky sundae dâu tây', price:'25.000 đ', svg:cupSVG({id:1, cupFill:'#F6D9D3', swirlColor:'#FFFFFF', toppingType:'strawberry'})},
+    {id:'kem2', name:'Lucky sundae O-coco', price:'25.000 đ', svg:cupSVG({id:2, cupFill:'#EDE3D8', swirlColor:'#FFFFFF', toppingType:'oreo'})},
+    {id:'kem3', name:'Super sundae đào hồng', price:'25.000 đ', svg:cupSVG({id:3, cupFill:'#FBE0D0', swirlColor:'#FFF4EC', toppingType:'peach'})},
+    {id:'kem4', name:'Sundae kiwi mát lạnh', price:'25.000 đ', svg:cupSVG({id:4, cupFill:'#E6F0D2', swirlColor:'#FFFFFF', toppingType:'kiwi'})}
+  ];
+  const teaItems = [
+    {id:'tea1', name:'Sữa thạch dâu tây', price:'22.000 đ', svg:teaSVG({id:1, liquid:'#F8D3D8', bitType:'strawberry'})},
+    {id:'tea2', name:'Sữa thạch kiwi kiwi', price:'22.000 đ', svg:teaSVG({id:2, liquid:'#F2F6D8', bitType:'kiwi'})},
+    {id:'tea3', name:'Trà sữa thạch đen', price:'25.000 đ', svg:teaSVG({id:3, liquid:'#E7D3B8', bitType:'black'})},
+    {id:'tea4', name:'Trà sữa truyền thống', price:'22.000 đ', svg:teaSVG({id:4, liquid:'#F0E4D0', bitType:'black'})}
+  ];
+
+  function renderProducts(containerId, items){
+    const el = document.getElementById(containerId);
+    el.innerHTML = items.map(p => `
+      <button class="product-card" onclick="soon('Chi tiết sản phẩm')">
+        <span class="product-image">
+          <span class="ice-tag">ICE</span>
+          ${p.svg}
+        </span>
+        <span class="product-info">
+          <span class="product-name">${p.name}</span>
+          <span class="product-bottom">
+            <span class="price">${p.price}</span>
+            <span id="qty-${p.id}"></span>
+          </span>
+        </span>
+      </button>
+    `).join('');
+    items.forEach(p => renderStepper(p.id));
+  }
+  renderProducts('kemScroll', kemItems);
+  renderProducts('teaScroll', teaItems);
+
+  /* ---------------- news data ---------------- */
+  const newsItems = [
+    {
+      title:'Hướng dẫn đặt hàng trên Zalo Mini App Hội Viên Mixue',
+      date:'10:37, 28/08/2025', views:225,
+      color1:'#E2231A', color2:'#F9C74F', label:'MIXUE'
+    },
+    {
+      title:'DÂU TÂY, DÂU TÂY, XUNG QUANH TOÀN LÀ DÂU TÂY 🍓🍓',
+      date:'16:20, 07/08/2025', views:46,
+      color1:'#4E9E5A', color2:'#E14B3E', label:'🍓'
+    },
+    {
+      title:'"MÀU DÂN TỘC SÁNG BỪNG TRÊN GIẤY ĐIỆP"',
+      date:'16:19, 07/08/2025', views:40,
+      color1:'#7A5C3E', color2:'#C79A5B', label:'🖌️'
+    }
+  ];
+  function newsThumb(n){
+    return `<svg viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg">
+      <rect width="200" height="130" fill="${n.color1}"/>
+      <circle cx="165" cy="20" r="30" fill="${n.color2}" opacity=".55"/>
+      <circle cx="20" cy="115" r="26" fill="${n.color2}" opacity=".4"/>
+      <text x="100" y="72" font-size="30" text-anchor="middle" dominant-baseline="middle">${n.label}</text>
+    </svg>`;
+  }
+  document.getElementById('newsGrid').innerHTML = newsItems.map(n => `
+    <button class="news-card" onclick="soon('Chi tiết bài viết')">
+      <span class="news-thumb">${newsThumb(n)}</span>
+      <span class="news-title">${n.title}</span>
+      <span class="news-meta">
+        <span>${n.date}</span>
+        <span class="views">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="2.5"/></svg>
+          ${n.views}
+        </span>
+      </span>
+    </button>
+  `).join('');
+</script>
+</body>
+</html>
