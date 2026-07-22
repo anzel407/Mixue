@@ -1,0 +1,2281 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bông Tuyết Nhỏ - Mixue Mini App</title>
+<style>
+  :root{
+    --red: #E2231A;
+    --red-dark: #C21810;
+    --red-soft: #FDEAE8;
+    --ink: #1C1C1E;
+    --sub: #8A8A8E;
+    --line: #EFEFF1;
+    --page-bg: #F4F4F6;
+    --card: #FFFFFF;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  html{height:100%;}
+  body{
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--page-bg);
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    min-height:100vh;
+    height:100vh;
+    overflow:hidden;
+  }
+  button{font-family:inherit;cursor:pointer;}
+
+  /* ---------- full-bleed app frame (keeps phone aspect ratio, no chrome) ---------- */
+  .device{
+    width:100%;
+    max-width:480px;
+    height:100vh;
+    margin:0 auto;
+    position:relative;
+  }
+  .screen{
+    width:100%;
+    height:100%;
+    background:var(--page-bg);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+
+  /* ---------- header ---------- */
+  .app-header{
+    flex-shrink:0;
+    background: linear-gradient(180deg,#EE3A2F 0%, var(--red) 55%, var(--red-dark) 100%);
+    color:#fff;
+    position:relative;
+    z-index:20;
+  }
+  .status-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:16px 24px 2px;
+    font-size:14px;
+    font-weight:600;
+    letter-spacing:.2px;
+  }
+  .status-row .icons{display:flex;align-items:center;gap:5px;}
+  .profile-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px 16px 18px;
+    gap:10px;
+  }
+  .profile-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:none;
+    border:none;
+    color:#fff;
+    padding:0;
+    text-align:left;
+  }
+  .avatar{
+    width:46px;height:46px;border-radius:50%;
+    background:#FFD9B3;
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;
+    border:2px solid rgba(255,255,255,.55);
+    flex-shrink:0;
+  }
+  .profile-text{display:flex;flex-direction:column;gap:2px;}
+  .profile-name{font-weight:700;font-size:16.5px;line-height:1.1;}
+  .profile-tier{font-size:12.5px;opacity:.92;line-height:1.1;}
+  .header-actions{display:flex;gap:8px;flex-shrink:0;}
+  .icon-btn{
+    width:32px;height:32px;border-radius:50%;
+    background:rgba(255,255,255,.2);
+    border:none;color:#fff;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .icon-btn.pill{width:auto;padding:0 10px;border-radius:16px;gap:3px;}
+
+  /* ---------- scroll area ---------- */
+  .scroll-area{
+    flex:1;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .scroll-area::-webkit-scrollbar{display:none;}
+
+  /* ---------- membership banner ---------- */
+  .banner-wrap{padding:14px 14px 6px;}
+  .membership-banner{
+    position:relative;
+    border-radius:20px;
+    overflow:hidden;
+    height:250px;
+    background:
+      radial-gradient(120% 90% at 75% 15%, #8B7FD1 0%, #5C6FC7 32%, #2450AE 60%, #123A8F 100%);
+    border:none;
+    display:block;
+    width:100%;
+    padding:0;
+  }
+  .membership-banner .snowfield{
+    position:absolute;left:0;right:0;bottom:0;height:70px;
+    background:linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(235,244,255,.9) 60%, #EAF3FF 100%);
+  }
+  .membership-banner .brand-row{
+    position:absolute;top:14px;left:16px;
+    display:flex;align-items:center;gap:7px;
+    color:#fff;font-weight:800;font-size:15px;letter-spacing:.5px;
+  }
+  .membership-banner .brand-row small{
+    display:block;font-size:7px;font-weight:600;letter-spacing:.5px;opacity:.85;margin-top:1px;
+  }
+  .membership-banner .headline{
+    position:absolute;top:56px;left:16px;right:120px;
+    color:#fff;
+    text-align:left;
+  }
+  .membership-banner .headline .l1{
+    font-size:25px;font-weight:900;font-style:italic;line-height:1.05;
+    color:#FFE066;
+    text-shadow: 0 2px 0 rgba(0,0,0,.15);
+    display:block;
+  }
+  .membership-banner .headline .l2{
+    font-size:23px;font-weight:900;font-style:italic;line-height:1.15;
+    color:#fff;
+    display:block;
+    margin-top:2px;
+  }
+  .membership-banner .app-pill{
+    position:absolute; left:16px; top:150px;
+    background:#fff; color:#3350B0;
+    font-size:11.5px; font-weight:800; letter-spacing:.4px;
+    padding:6px 14px; border-radius:20px;
+  }
+  .membership-banner .mascot{position:absolute; right:6px; top:34px; width:150px; height:150px;}
+  .membership-banner .tree{position:absolute; bottom:8px; opacity:.95;}
+
+  /* ---------- quick actions grid ---------- */
+  .quick-actions{
+    background:var(--card);
+    margin:12px 14px;
+    border-radius:18px;
+    padding:18px 6px 8px;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    row-gap:16px;
+  }
+  .qa-item{
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    background:none;border:none;color:var(--ink);
+    font-size:12px;font-weight:500;line-height:1.25;text-align:center;
+    padding:0 2px;
+  }
+  .qa-icon-circle{
+    width:50px;height:50px;border-radius:50%;
+    background:var(--red-soft);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--red);
+  }
+
+  /* ---------- OA follow banner ---------- */
+  .oa-banner{
+    background:#FBE8E6;
+    margin:0 14px 18px;
+    border-radius:16px;
+    padding:14px 14px 12px;
+  }
+  .oa-banner .oa-lead{
+    font-size:13px;color:#6b3b36;font-weight:500;
+    padding-bottom:10px;margin-bottom:10px;
+    border-bottom:1px solid rgba(0,0,0,.06);
+  }
+  .oa-banner .oa-row{display:flex;align-items:center;gap:10px;}
+  .oa-avatar{
+    width:38px;height:38px;border-radius:50%;
+    background:var(--red);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;position:relative;
+  }
+  .oa-name{flex:1;font-size:14.5px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:4px;}
+  .follow-btn{
+    background:var(--red);color:#fff;border:none;
+    font-size:13px;font-weight:700;
+    padding:8px 18px;border-radius:20px;flex-shrink:0;
+  }
+  .follow-btn.followed{background:#fff;color:var(--sub);border:1px solid #ddd;}
+
+  /* ---------- generic sections ---------- */
+  .section{padding:0 14px 8px;}
+  .section-header{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:12px;
+  }
+  .section-title{font-size:19px;font-weight:800;color:var(--ink);}
+  .section-link{background:none;border:none;color:var(--red);font-size:13.5px;font-weight:600;padding:0;}
+  .h-scroll{
+    display:flex;gap:11px;overflow-x:auto;padding-bottom:6px;margin:0 -14px;padding-left:14px;padding-right:14px;
+    scrollbar-width:none;
+  }
+  .h-scroll::-webkit-scrollbar{display:none;}
+
+  .product-card{
+    flex:0 0 144px;
+    background:var(--card);
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow:0 1px 6px rgba(0,0,0,.06);
+    text-align:left;
+    border:none;
+    padding:0;
+    display:flex;flex-direction:column;
+  }
+  .product-image{
+    height:144px;position:relative;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .product-image svg{width:100%;height:100%;}
+  .ice-tag{
+    position:absolute;top:7px;left:7px;
+    background:rgba(255,255,255,.9);
+    color:#0B4F9E;font-size:8.5px;font-weight:800;
+    padding:2px 6px;border-radius:5px;
+    letter-spacing:.3px;
+  }
+  .product-info{padding:9px 10px 10px;flex:1;display:flex;flex-direction:column;justify-content:space-between;}
+  .product-name{
+    font-size:12.8px;font-weight:600;color:var(--ink);
+    line-height:1.28;
+    min-height:33px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .product-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
+  .price{font-weight:800;font-size:13.5px;color:var(--ink);}
+  .add-btn{
+    width:24px;height:24px;border-radius:50%;
+    background:var(--red);color:#fff;border:none;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .stepper{display:flex;align-items:center;gap:6px;}
+  .stepper button{
+    width:22px;height:22px;border-radius:50%;border:1.4px solid var(--red);
+    background:#fff;color:var(--red);display:flex;align-items:center;justify-content:center;
+  }
+  .stepper .qty{font-size:13px;font-weight:700;min-width:14px;text-align:center;}
+
+  /* ---------- news ---------- */
+  .news-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .news-card{background:none;border:none;padding:0;text-align:left;color:inherit;}
+  .news-thumb{width:100%;height:96px;border-radius:12px;overflow:hidden;margin-bottom:8px;}
+  .news-thumb svg{width:100%;height:100%;}
+  .news-title{font-size:13px;font-weight:700;color:var(--ink);line-height:1.3;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:6px;}
+  .news-meta{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--sub);}
+  .news-meta .views{display:flex;align-items:center;gap:3px;}
+
+  /* ---------- bottom nav ---------- */
+  .bottom-nav{
+    flex-shrink:0;
+    display:flex;
+    background:#fff;
+    border-top:1px solid var(--line);
+    padding:9px 0 12px;
+    position:absolute;
+    left:0; right:0; bottom:0;
+    z-index:20;
+  }
+  .nav-item{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+    background:none;border:none;color:var(--sub);font-size:10.5px;font-weight:500;
+    position:relative;
+  }
+  .nav-item.active{color:var(--red);}
+  .nav-badge{
+    position:absolute;top:-4px;right:20%;
+    background:var(--red);color:#fff;font-size:9px;font-weight:700;
+    min-width:15px;height:15px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;padding:0 3px;
+  }
+
+  /* ---------- toast ---------- */
+  .toast{
+    position:absolute;left:50%;bottom:92px;
+    transform:translateX(-50%) translateY(12px);
+    background:rgba(28,28,30,.92);color:#fff;
+    padding:10px 18px;border-radius:22px;font-size:13px;font-weight:500;
+    opacity:0;pointer-events:none;transition:opacity .22s ease, transform .22s ease;
+    white-space:nowrap;z-index:200;max-width:80%;overflow:hidden;text-overflow:ellipsis;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* ---------- page switching ---------- */
+  .page{
+    position:absolute; inset:0 0 auto 0;
+    top:0; bottom:70px;
+    display:none;
+    flex-direction:column;
+    background:var(--page-bg);
+  }
+  .page.active{display:flex;}
+
+  /* ---------- profile header ---------- */
+  .profile-app-header{padding-bottom:16px;}
+  .profile-id-row{
+    display:flex; align-items:center; gap:12px;
+    padding:10px 16px 4px;
+  }
+  .profile-avatar{width:48px;height:48px;font-size:22px;}
+  .profile-id-text{flex:1; display:flex; flex-direction:column; gap:2px;}
+  .profile-id-name{font-weight:800; font-size:19px; line-height:1.15;}
+  .profile-id-phone{font-size:13.5px; opacity:.92;}
+
+  /* ---------- membership tier row (screenshot 2) ---------- */
+  .tier-card{
+    display:flex; align-items:center; justify-content:space-between;
+    background:#fff; border:none; margin:0 0 1px; padding:16px 16px;
+    width:100%;
+  }
+  .tier-name{color:var(--red); font-weight:800; font-size:16.5px;}
+  .tier-right{display:flex; align-items:center; gap:8px;}
+  .tier-badge{
+    width:26px;height:26px;border-radius:6px;
+    background:linear-gradient(135deg,#7EC8F2,#3E7FD8);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .tier-points{font-weight:700; font-size:15px; color:var(--ink);}
+
+  .pf-row{
+    display:flex; align-items:center; gap:12px;
+    background:#fff; border:none; width:100%;
+    padding:14px 16px 18px; margin-bottom:8px;
+  }
+  .pf-icon-circle{
+    width:36px;height:36px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--red-soft); color:var(--red); flex-shrink:0;
+  }
+  .pf-label{flex:1; text-align:left; font-size:15px; font-weight:600; color:var(--ink);}
+
+  .pf-block{background:#fff; margin-bottom:8px;}
+  .pf-plain-row{
+    display:flex; align-items:center; gap:14px;
+    width:100%; border:none; background:none;
+    padding:15px 16px; border-bottom:1px solid var(--line);
+  }
+  .pf-plain-label{flex:1; text-align:left; font-size:15px; color:var(--ink); font-weight:500;}
+  .pf-orders-head .pf-plain-row{align-items:center;}
+  .pf-see-all{
+    display:flex; align-items:center; gap:2px;
+    font-size:12.5px; color:var(--sub);
+  }
+
+  .order-icons{
+    display:flex; justify-content:space-between;
+    padding:14px 16px 20px; border-bottom:1px solid var(--line);
+  }
+  .order-icon-item{
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    background:none; border:none; flex:1;
+    font-size:11px; color:var(--ink); font-weight:500; text-align:center;
+  }
+
+  .pf-oa-band{background:var(--page-bg); margin-bottom:8px;}
+  .pf-oa-lead{font-size:13px; color:var(--sub); padding:16px 14px 12px; border-bottom:1px solid var(--line); margin-bottom:2px;}
+  .pf-oa-band .oa-avatar{background:var(--red);}
+  .pf-oa-band .oa-name{flex:1; font-size:14.5px; font-weight:700; color:var(--ink);}
+
+  .pf-qr-block{background:var(--page-bg); text-align:center; padding:8px 20px 26px;}
+  .pf-qr-caption{color:var(--sub); font-size:13.5px; margin-bottom:18px;}
+  .pf-qr-card{max-width:280px; margin:0 auto;}
+  .pf-qr-logo{
+    width:80px;height:80px;border-radius:16px;
+    background:var(--red);
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 12px;
+  }
+  .pf-qr-title{font-size:21px; font-weight:800; color:var(--ink); margin-bottom:16px;}
+  .pf-qr-code{
+    width:220px; height:220px; margin:0 auto 22px;
+    position:relative;
+  }
+  .pf-qr-actions{display:flex; justify-content:center; gap:14px; margin-bottom:24px;}
+  .pf-qr-btn{
+    display:flex; align-items:center; gap:6px;
+    background:#fff; border:1px solid var(--line);
+    border-radius:24px; padding:10px 18px;
+    font-size:13.5px; font-weight:600; color:var(--ink);
+  }
+  .pf-powered{
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    color:#B9BBC0; font-size:12px; font-weight:700; letter-spacing:.3px;
+  }
+
+  /* ================= AI (Mixu) HOME BANNER ================= */
+  .ai-banner-wrap{padding:2px 14px 6px;}
+  .ai-banner{
+    width:100%; border:none; text-align:left;
+    display:flex; align-items:center; gap:12px;
+    padding:13px 14px;
+    border-radius:18px;
+    background:
+      radial-gradient(120% 160% at 0% 0%, #FFF4D6 0%, transparent 45%),
+      linear-gradient(120deg, #2D2A6E 0%, #5B3FA0 45%, #B5326A 100%);
+    box-shadow:0 6px 16px rgba(91,63,160,.28);
+    position:relative; overflow:hidden;
+  }
+  .ai-banner::after{
+    content:"";
+    position:absolute; top:-40%; right:-10%; width:120px; height:220%;
+    background:rgba(255,255,255,.14);
+    transform:rotate(20deg);
+  }
+  .ai-banner-logo{
+    width:44px;height:44px;border-radius:50%;
+    overflow:hidden; flex-shrink:0;
+    background:#fff;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 0 2px rgba(255,255,255,.5);
+  }
+  .ai-banner-logo img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;}
+  .ai-banner-text{flex:1; min-width:0; position:relative; z-index:1;}
+  .ai-banner-title{
+    display:flex; align-items:center; gap:6px;
+    color:#fff; font-weight:800; font-size:15px;
+  }
+  .ai-badge{
+    background:linear-gradient(120deg,#FFE066,#FFB238);
+    color:#5B3400; font-size:9.5px; font-weight:900;
+    padding:2px 6px; border-radius:8px; letter-spacing:.3px;
+  }
+  .ai-banner-sub{
+    color:rgba(255,255,255,.88); font-size:12.5px; font-weight:500;
+    margin-top:2px; display:block;
+  }
+  .ai-banner-arrow{
+    color:#fff; flex-shrink:0; position:relative; z-index:1;
+    width:26px;height:26px;border-radius:50%;
+    background:rgba(255,255,255,.18);
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  /* ================= AI CHAT PAGE ================= */
+  .ai-app-header{
+    background: linear-gradient(180deg,#EE3A2F 0%, var(--red) 55%, var(--red-dark) 100%);
+    padding-bottom:12px;
+  }
+  .ai-top-row{
+    display:flex; align-items:center; gap:10px;
+    padding:12px 12px 4px;
+  }
+  .ai-top-title{
+    flex:1; display:flex; align-items:center; justify-content:center; gap:8px;
+    color:#fff; font-weight:800; font-size:16px;
+    margin-right:32px;
+  }
+  .ai-top-logo{width:26px;height:26px;border-radius:50%;object-fit:cover;background:#fff;flex-shrink:0;}
+
+  .ai-body{
+    flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;
+    padding:18px 14px 14px; scrollbar-width:none;
+    display:flex; flex-direction:column;
+  }
+  .ai-body::-webkit-scrollbar{display:none;}
+
+  .ai-empty{
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; gap:10px; padding:20px 10px 60px;
+  }
+  .ai-empty-logo{
+    width:64px;height:64px;border-radius:50%; overflow:hidden;
+    box-shadow:0 6px 18px rgba(226,35,26,.25); margin-bottom:6px;
+  }
+  .ai-empty-logo img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;}
+  .ai-empty-title{font-size:22px; font-weight:800; color:var(--ink); line-height:1.3;}
+  .ai-empty-sub{font-size:13.5px; color:var(--sub); max-width:260px; line-height:1.4;}
+
+  .ai-messages{display:flex; flex-direction:column; gap:14px;}
+  .ai-msg-row{display:flex; gap:8px; align-items:flex-end;}
+  .ai-msg-row.user{justify-content:flex-end;}
+  .ai-msg-row.ai{justify-content:flex-start;}
+  .ai-avatar-sm{
+    width:26px;height:26px;border-radius:50%; overflow:hidden; flex-shrink:0;
+    box-shadow:0 0 0 1px var(--line);
+  }
+  .ai-avatar-sm img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;}
+  .ai-bubble{
+    max-width:76%; padding:11px 14px; border-radius:16px;
+    font-size:14px; line-height:1.4;
+  }
+  .ai-bubble.user{
+    background:var(--red); color:#fff; border-bottom-right-radius:4px;
+  }
+  .ai-bubble.ai-text{
+    background:#fff; color:var(--ink); border-bottom-left-radius:4px;
+    box-shadow:0 1px 4px rgba(0,0,0,.05);
+  }
+  .ai-thinking{display:flex; align-items:center; gap:5px; padding:13px 16px;}
+  .ai-thinking span{
+    width:6px;height:6px;border-radius:50%; background:#C7C9CE;
+    animation:aiDot 1.1s infinite ease-in-out;
+  }
+  .ai-thinking span:nth-child(2){animation-delay:.15s;}
+  .ai-thinking span:nth-child(3){animation-delay:.3s;}
+  @keyframes aiDot{
+    0%,60%,100%{transform:translateY(0); opacity:.4;}
+    30%{transform:translateY(-4px); opacity:1;}
+  }
+
+  .ai-sugg-card{
+    width:100%; max-width:280px; background:#fff; border-radius:20px; overflow:hidden;
+    box-shadow:0 4px 16px rgba(0,0,0,.10);
+  }
+  .ai-sugg-label{
+    font-size:11.5px; font-weight:700; color:var(--red);
+    padding:13px 14px 10px; letter-spacing:.3px;
+  }
+  .ai-sugg-img{
+    width:100%; aspect-ratio:1/1; overflow:hidden;
+    background:linear-gradient(160deg,#4FA6E8,#0B63C2);
+  }
+  .ai-sugg-img img{width:100%;height:100%;object-fit:cover;display:block;}
+  .ai-sugg-info{padding:12px 14px 2px; display:flex; flex-direction:column; gap:6px;}
+  .ai-sugg-name{font-size:17px; font-weight:800; color:var(--ink); line-height:1.25;}
+  .ai-sugg-price-row{display:flex; align-items:center; justify-content:space-between;}
+  .ai-sugg-price{font-size:16px; font-weight:800; color:var(--red);}
+  .ai-sugg-time{
+    display:flex; align-items:center; gap:5px;
+    font-size:12px; color:var(--sub); font-weight:500;
+  }
+  .ai-sugg-actions{display:flex; gap:8px; padding:14px;}
+  .ai-btn-next{
+    flex:1; border:1px solid var(--line); background:#fff; color:var(--ink);
+    font-size:13.5px; font-weight:700; border-radius:22px; padding:11px 0;
+    display:flex; align-items:center; justify-content:center; gap:4px;
+  }
+  .ai-btn-choose{
+    flex:1.3; border:none; background:var(--red); color:#fff;
+    font-size:13.5px; font-weight:700; border-radius:22px; padding:11px 0;
+  }
+
+  /* ---------- preference (sugar / ice / topping) card ---------- */
+  .ai-pref-card{
+    width:100%; max-width:290px; background:#fff; border-radius:20px;
+    box-shadow:0 4px 16px rgba(0,0,0,.10); padding:16px 16px 14px;
+  }
+  .ai-pref-title{font-size:15px; font-weight:800; color:var(--ink); margin-bottom:14px; line-height:1.3;}
+  .ai-pref-group{margin-bottom:14px;}
+  .ai-pref-label{font-size:12.5px; font-weight:700; color:var(--sub); margin-bottom:8px; text-transform:uppercase; letter-spacing:.3px;}
+  .ai-pref-hint{font-size:11px; font-weight:500; color:#B8B8BC; text-transform:none; letter-spacing:0;}
+  .ai-pref-options{display:flex; flex-wrap:wrap; gap:7px;}
+  .ai-pref-chip{
+    border:1.4px solid var(--line); background:#fff; color:var(--ink);
+    font-size:12.5px; font-weight:600; padding:7px 13px; border-radius:16px;
+  }
+  .ai-pref-chip.selected{background:var(--red); border-color:var(--red); color:#fff;}
+  .ai-pref-confirm{width:100%; margin-top:2px;}
+
+  /* ---------- shared info card (address / payment / order-complete) ---------- */
+  .ai-info-card{
+    width:100%; max-width:290px; background:#fff; border-radius:20px;
+    box-shadow:0 4px 16px rgba(0,0,0,.10); padding:16px;
+  }
+  .ai-info-title{font-size:15px; font-weight:800; color:var(--ink); margin-bottom:10px; line-height:1.3;}
+  .ai-map-frame{width:100%; height:150px; border-radius:14px; overflow:hidden; margin:10px 0; background:var(--page-bg);}
+  .ai-map-frame iframe{width:100%; height:100%; border:0; display:block;}
+  .ai-address-text{
+    font-size:13.5px; color:var(--ink); font-weight:600; background:var(--page-bg);
+    padding:10px 12px; border-radius:12px; display:flex; align-items:flex-start; gap:8px;
+  }
+  .ai-option-row{display:flex; gap:8px; margin-top:4px;}
+  .ai-option-btn{
+    flex:1; border:1.4px solid var(--line); background:#fff; color:var(--ink);
+    font-weight:700; font-size:13px; padding:11px 0; border-radius:16px;
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+  }
+  .ai-option-btn.selected{background:var(--red); border-color:var(--red); color:#fff;}
+
+  /* ---------- driver / delivery progress card ---------- */
+  .ai-driver-card{
+    width:100%; max-width:290px; background:#fff; border-radius:20px;
+    box-shadow:0 4px 16px rgba(0,0,0,.10); padding:16px;
+  }
+  .ai-driver-head{display:flex; align-items:center; gap:10px; margin-bottom:6px;}
+  .ai-driver-avatar{
+    width:44px;height:44px;border-radius:50%; background:var(--red-soft);
+    display:flex; align-items:center; justify-content:center; font-size:21px; flex-shrink:0;
+  }
+  .ai-driver-info{flex:1; min-width:0;}
+  .ai-driver-name{font-weight:800; font-size:14.5px; color:var(--ink);}
+  .ai-driver-sub{font-size:12px; color:var(--sub); margin-top:2px;}
+  .ai-progress-steps{
+    display:flex; justify-content:space-between; margin:14px 0 6px;
+    font-size:10px; color:var(--sub); font-weight:700; text-align:center;
+  }
+  .ai-progress-steps .step{flex:1;}
+  .ai-progress-steps .step.done{color:var(--red);}
+  .ai-progress-bar{height:5px; background:var(--line); border-radius:3px; margin-bottom:14px; position:relative; overflow:hidden;}
+  .ai-progress-bar-fill{position:absolute; left:0; top:0; height:100%; background:var(--red); border-radius:3px; transition:width .5s ease;}
+  .ai-driver-actions{display:flex; gap:8px; margin-bottom:12px;}
+  .ai-driver-actions button{
+    flex:1; display:flex; align-items:center; justify-content:center; gap:5px;
+    border:1.4px solid var(--line); background:#fff; border-radius:16px;
+    padding:9px 0; font-size:12px; font-weight:700; color:var(--ink);
+  }
+  .ai-order-actions{display:flex; gap:8px;}
+  .ai-btn-cancel{
+    flex:1; border:1.4px solid #E4E4E7; background:#fff; color:var(--sub);
+    font-weight:700; font-size:13px; border-radius:20px; padding:11px 0;
+  }
+  .ai-btn-receive{
+    flex:1.3; border:none; background:var(--red); color:#fff;
+    font-weight:700; font-size:13px; border-radius:20px; padding:11px 0;
+  }
+
+  /* ---------- rating / completion ---------- */
+  .ai-wish-text{font-size:13.5px; color:var(--ink); text-align:center; line-height:1.55; margin:4px 0 16px;}
+  .ai-rating-stars{display:flex; gap:6px; justify-content:center; margin:0 0 12px;}
+  .ai-rating-stars button{background:none; border:none; color:#D9D9DE; padding:0; font-size:26px; line-height:1;}
+  .ai-rating-stars button.on{color:#F2A73A;}
+  .ai-rating-textarea{
+    width:100%; border:1.4px solid var(--line); border-radius:12px; padding:10px;
+    font-size:13px; font-family:inherit; resize:none; min-height:56px; margin-bottom:12px;
+  }
+
+  /* ---------- loading (search driver / cancelling) ---------- */
+  .ai-loading-row{display:flex; align-items:center; gap:10px; font-size:13.5px; color:var(--ink); font-weight:600; padding:2px 0;}
+  .ai-spinner{
+    width:16px;height:16px;border-radius:50%; border:2.4px solid var(--line); border-top-color:var(--red);
+    animation:aiSpin .8s linear infinite; flex-shrink:0;
+  }
+  @keyframes aiSpin{ to{ transform:rotate(360deg); } }
+
+  /* ---------- voucher list ---------- */
+  .ai-voucher-list{display:flex; flex-direction:column; gap:8px;}
+  .ai-voucher-item{
+    display:flex; align-items:center; gap:10px;
+    border:1.4px dashed var(--line); background:var(--page-bg);
+    border-radius:14px; padding:10px 12px; width:100%; text-align:left;
+  }
+  .ai-voucher-item:active{border-color:var(--red); background:var(--red-soft);}
+  .ai-voucher-badge{
+    flex-shrink:0; background:var(--red); color:#fff; font-weight:800; font-size:12.5px;
+    padding:6px 9px; border-radius:10px; white-space:nowrap;
+  }
+  .ai-voucher-text{display:flex; flex-direction:column; gap:2px; min-width:0;}
+  .ai-voucher-text b{font-size:13px; color:var(--ink);}
+  .ai-voucher-text span{font-size:11px; color:var(--sub); line-height:1.3;}
+
+  /* ---------- save-for-later button & saved drinks row ---------- */
+  .ai-save-btn{
+    width:100%; border:1.4px dashed var(--red); background:var(--red-soft); color:var(--red);
+    font-weight:700; font-size:13px; border-radius:16px; padding:11px 0;
+  }
+  .ai-pref-ai-btn{
+    width:100%; border:none; margin-bottom:14px;
+    background:linear-gradient(120deg,#5B3FA0,#B5326A);
+    color:#fff; font-weight:700; font-size:13px; border-radius:16px; padding:10px 0;
+  }
+  .ai-saved-row{
+    flex-shrink:0; display:flex; gap:8px; overflow-x:auto;
+    padding:10px 12px; background:#fff; border-top:1px solid var(--line);
+    scrollbar-width:none;
+  }
+  .ai-saved-row::-webkit-scrollbar{display:none;}
+  .ai-saved-chip{
+    flex:0 0 auto; display:flex; align-items:center; gap:7px;
+    background:var(--page-bg); border:1px solid var(--line); border-radius:20px;
+    padding:7px 13px 7px 8px; white-space:nowrap;
+  }
+  .ai-saved-chip .icon{
+    width:22px;height:22px;border-radius:50%; background:var(--red);
+    color:#fff; display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;
+  }
+  .ai-saved-chip .txt{display:flex; flex-direction:column; align-items:flex-start; line-height:1.2;}
+  .ai-saved-chip .txt b{font-size:12px; color:var(--ink); font-weight:700;}
+  .ai-saved-chip .txt span{font-size:10px; color:var(--sub);}
+  .ai-saved-chip .remove{
+    background:none;border:none;color:#C7C9CE;padding:0 0 0 4px;display:flex;align-items:center;flex-shrink:0;
+  }
+
+  /* ---------- AI input area ---------- */
+  .ai-input-area{
+    flex-shrink:0; background:#fff; border-top:1px solid var(--line);
+    padding:10px 12px; padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));
+  }
+  .ai-input-bar{
+    display:flex; align-items:center; gap:8px;
+    background:var(--page-bg); border-radius:26px; padding:6px 6px 6px 16px;
+  }
+  .ai-input-bar input{
+    flex:1; border:none; background:none; outline:none;
+    font-size:14.5px; color:var(--ink); font-family:inherit;
+  }
+  .ai-input-bar input::placeholder{color:#AEB0B6;}
+  .ai-mic-btn, .ai-send-btn{
+    width:36px;height:36px;border-radius:50%; border:none; flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .ai-mic-btn{background:#fff; color:var(--red); box-shadow:0 1px 3px rgba(0,0,0,.08);}
+  .ai-send-btn{background:var(--red); color:#fff;}
+
+  .ai-voice-caption{
+    font-size:13px; color:var(--ink); font-weight:500;
+    padding:0 8px 8px; text-align:center; min-height:18px;
+    line-height:1.3;
+  }
+  .ai-voice-bar{
+    display:flex; align-items:center; gap:10px;
+    background:var(--page-bg); border-radius:26px; padding:8px 10px;
+  }
+  .ai-voice-cancel, .ai-voice-finish{
+    width:38px;height:38px;border-radius:50%; border:none; flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .ai-voice-cancel{background:#fff; color:var(--sub); box-shadow:0 1px 3px rgba(0,0,0,.08);}
+  .ai-voice-finish{background:var(--red); color:#fff;}
+  .ai-voice-bars{
+    flex:1; display:flex; align-items:center; justify-content:center; gap:3px; height:30px;
+  }
+  .ai-voice-bars span{
+    width:3.5px; border-radius:3px; background:var(--red);
+    animation:aiWave 1s infinite ease-in-out;
+  }
+  .ai-voice-bars span:nth-child(1){height:10px; animation-delay:0s;}
+  .ai-voice-bars span:nth-child(2){height:22px; animation-delay:.1s;}
+  .ai-voice-bars span:nth-child(3){height:14px; animation-delay:.2s;}
+  .ai-voice-bars span:nth-child(4){height:26px; animation-delay:.3s;}
+  .ai-voice-bars span:nth-child(5){height:12px; animation-delay:.4s;}
+  .ai-voice-bars span:nth-child(6){height:20px; animation-delay:.5s;}
+  .ai-voice-bars span:nth-child(7){height:9px; animation-delay:.6s;}
+  @keyframes aiWave{
+    0%,100%{transform:scaleY(.5);}
+    50%{transform:scaleY(1);}
+  }
+</style>
+</head>
+<body>
+
+<div class="device">
+  <div class="screen">
+
+  <div class="page page-home active" id="pageHome">
+    <!-- ===== HEADER ===== -->
+    <div class="app-header">
+      <div class="status-row">
+        <span id="clockHome">3:59</span>
+        <span class="icons">
+          <svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="#fff"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="#fff"/><rect x="9" y="2.5" width="3" height="8.5" rx="0.5" fill="#fff"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="#fff" opacity=".55"/></svg>
+          <svg width="15" height="11" viewBox="0 0 15 11" fill="none"><path d="M7.5 9.2a1.2 1.2 0 100 2.4 1.2 1.2 0 000-2.4z" fill="#fff"/><path d="M3.7 6.6a5.3 5.3 0 017.6 0l-1.3 1.3a3.5 3.5 0 00-5 0L3.7 6.6z" fill="#fff"/><path d="M0.9 3.8a9.2 9.2 0 0113.2 0L12.8 5A7.4 7.4 0 002.2 5L0.9 3.8z" fill="#fff" opacity=".7"/></svg>
+          <svg width="24" height="11" viewBox="0 0 24 11" fill="none"><rect x="0.5" y="0.5" width="20" height="10" rx="2.5" stroke="#fff" opacity=".6"/><rect x="2" y="2" width="17" height="7" rx="1.2" fill="#fff"/><rect x="21.5" y="3.5" width="1.6" height="4" rx="0.8" fill="#fff" opacity=".6"/></svg>
+        </span>
+      </div>
+      <div class="profile-row">
+        <button class="profile-left" onclick="goProfile()">
+          <span class="avatar">🙂</span>
+          <span class="profile-text">
+            <span class="profile-name">Nguyễn Vũ</span>
+            <span class="profile-tier">Bông Tuyết Nhỏ &nbsp;|&nbsp; 0 điểm</span>
+          </span>
+        </button>
+        <div class="header-actions">
+          <button class="icon-btn" onclick="soon('Menu thêm')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+          </button>
+          <button class="icon-btn" onclick="soon('Đóng ứng dụng')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SCROLLABLE CONTENT ===== -->
+    <div class="scroll-area" id="scrollArea">
+
+      <!-- membership banner -->
+      <div class="banner-wrap">
+        <button class="membership-banner" onclick="soon('Thẻ hội viên')">
+          <img src="0.jpg" alt="Thẻ hội viên Bông Tuyết Nhỏ" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:20px;">
+        </button>
+      </div>
+
+      <!-- quick actions -->
+      <div class="quick-actions">
+        <button class="qa-item" onclick="soon('Tích điểm')">
+          <span class="qa-icon-circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7l1.5 3 3.3.3-2.5 2.2.8 3.3L12 14l-3.1 1.8.8-3.3-2.5-2.2 3.3-.3z" fill="currentColor" stroke="none"/></svg></span>
+          Tích điểm
+        </button>
+        <button class="qa-item" onclick="soon('Đổi thưởng')">
+          <span class="qa-icon-circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M4 9h16M12 9v11"/><path d="M12 9c-2.2 0-3.5-1.2-3.5-2.6C8.5 5 9.6 4 11 4c1.6 0 1.9 2.4 1 5zM12 9c2.2 0 3.5-1.2 3.5-2.6C15.5 5 14.4 4 13 4c-1.6 0-1.9 2.4-1 5z"/></svg></span>
+          Đổi thưởng
+        </button>
+        <button class="qa-item" onclick="soon('Đặt hàng')">
+          <span class="qa-icon-circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 8h12l-1 12H7z"/><path d="M9 8a3 3 0 016 0"/></svg></span>
+          Đặt hàng
+        </button>
+        <button class="qa-item" onclick="soon('Liên hệ')">
+          <span class="qa-icon-circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h4l2 5-2.5 1.5a11 11 0 005 5L14 14l5 2v4c0 1-1 2-2 2C10 22 2 14 2 7c0-1 1-2 2-2z"/><path d="M15 9l2-2 2 2M17 7v5"/></svg></span>
+          Liên hệ
+        </button>
+        <button class="qa-item" onclick="soon('Tin tức')">
+          <span class="qa-icon-circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h11v11a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><path d="M15 9h5v9a2 2 0 01-2 2h-3M8 9h4M8 12.5h4M8 16h2"/></svg></span>
+          Tin tức
+        </button>
+        <button class="qa-item" onclick="soon('Chat ngay')">
+          <span class="qa-icon-circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4a8 8 0 00-6.9 12.1L4 20l4-1a8 8 0 104-15z"/></svg></span>
+          Chat ngay
+        </button>
+        <button class="qa-item" onclick="soon('Quyền lợi thành viên')">
+          <span class="qa-icon-circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9l3 2 5-6 5 6 3-2-1.5 9h-13z"/></svg></span>
+          Quyền lợi thành viên
+        </button>
+        <button class="qa-item" onclick="soon('Lịch sử mua hàng')">
+          <span class="qa-icon-circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v3h3M9 11h6M9 14h6M9 17h3"/><path d="M9 8.5l1 1 2-2" stroke-width="1.5"/></svg></span>
+          Lịch sử mua hàng
+        </button>
+      </div>
+
+      <!-- OA follow banner -->
+      <div class="oa-banner">
+        <div class="oa-lead">Quan tâm OA để nhận các chương trình đặc quyền ưu đãi</div>
+        <div class="oa-row">
+          <span class="oa-avatar">
+            <svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="9" r="5.5" fill="#fff"/><circle cx="12" cy="17.5" r="4" fill="#fff"/></svg>
+          </span>
+          <span class="oa-name">Hội Viên Mixue
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="#3897F0"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <button class="follow-btn" id="followBtn" onclick="toggleFollow()">Quan tâm</button>
+        </div>
+      </div>
+
+      <!-- Mixu AI banner -->
+      <div class="ai-banner-wrap">
+        <button class="ai-banner" onclick="openAI()">
+          <span class="ai-banner-logo"><img src="logo.jpg" alt="Mixu" onerror="this.parentElement.innerHTML='🐧'"></span>
+          <span class="ai-banner-text">
+            <span class="ai-banner-title">Mixu <span class="ai-badge">AI</span></span>
+            <span class="ai-banner-sub">Mixu order, đỡ phải chờ!</span>
+          </span>
+          <span class="ai-banner-arrow">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+          </span>
+        </button>
+      </div>
+
+      <!-- KEM -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title">Kem</span>
+          <button class="section-link" onclick="soon('Danh mục Kem')">Tất cả</button>
+        </div>
+        <div class="h-scroll" id="kemScroll"></div>
+      </div>
+
+      <!-- TRÀ SỮA -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title">Trà sữa</span>
+          <button class="section-link" onclick="soon('Danh mục Trà sữa')">Tất cả</button>
+        </div>
+        <div class="h-scroll" id="teaScroll"></div>
+      </div>
+
+      <!-- TIN TỨC -->
+      <div class="section" style="padding-bottom:20px;">
+        <div class="section-header">
+          <span class="section-title">Tin tức</span>
+          <button class="section-link" onclick="soon('Xem thêm tin tức')">Xem thêm</button>
+        </div>
+        <div class="news-grid" id="newsGrid"></div>
+      </div>
+
+    </div>
+  </div><!-- /page-home -->
+
+  <!-- ===== PROFILE PAGE ("Cá nhân") ===== -->
+  <div class="page page-profile" id="pageProfile">
+    <div class="app-header profile-app-header">
+      <div class="status-row">
+        <span id="clockProfile">15:59</span>
+        <span class="icons">
+          <svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="#fff"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="#fff"/><rect x="9" y="2.5" width="3" height="8.5" rx="0.5" fill="#fff"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="#fff" opacity=".55"/></svg>
+          <svg width="15" height="11" viewBox="0 0 15 11" fill="none"><path d="M7.5 9.2a1.2 1.2 0 100 2.4 1.2 1.2 0 000-2.4z" fill="#fff"/><path d="M3.7 6.6a5.3 5.3 0 017.6 0l-1.3 1.3a3.5 3.5 0 00-5 0L3.7 6.6z" fill="#fff"/><path d="M0.9 3.8a9.2 9.2 0 0113.2 0L12.8 5A7.4 7.4 0 002.2 5L0.9 3.8z" fill="#fff" opacity=".7"/></svg>
+          <svg width="24" height="11" viewBox="0 0 24 11" fill="none"><rect x="0.5" y="0.5" width="20" height="10" rx="2.5" stroke="#fff" opacity=".6"/><rect x="2" y="2" width="17" height="7" rx="1.2" fill="#fff"/><rect x="21.5" y="3.5" width="1.6" height="4" rx="0.8" fill="#fff" opacity=".6"/></svg>
+        </span>
+      </div>
+      <div class="profile-id-row">
+        <span class="avatar profile-avatar">🙂</span>
+        <span class="profile-id-text">
+          <span class="profile-id-name">Nguyễn Vũ</span>
+          <span class="profile-id-phone">0966981074</span>
+        </span>
+        <div class="header-actions">
+          <button class="icon-btn" onclick="soon('Menu thêm')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+          </button>
+          <button class="icon-btn" onclick="goHome()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-area" id="scrollAreaProfile">
+
+      <!-- membership tier row -->
+      <button class="tier-card" onclick="soon('Thẻ hội viên')">
+        <span class="tier-name">Bông Tuyết Nhỏ</span>
+        <span class="tier-right">
+          <span class="tier-badge">
+            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 2 L15 9 L22 9 L16.5 13.5 L18.5 21 L12 16.5 L5.5 21 L7.5 13.5 L2 9 L9 9 Z" fill="#fff"/></svg>
+          </span>
+          <span class="tier-points">0</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C7C9CE" stroke-width="2.4" stroke-linecap="round"><polyline points="9 6 15 12 9 18"/></svg>
+        </span>
+      </button>
+
+      <button class="pf-row pf-gift" onclick="soon('Ưu đãi')">
+        <span class="pf-icon-circle pf-gift-circle">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="8" width="18" height="13" rx="1.5"/><path d="M3 12h18"/><path d="M12 8v13"/><path d="M12 8c-2.4 0-3.8-1.3-3.8-2.8C8.2 3.9 9.4 2.7 11 2.7c1.8 0 2.1 2.7 1 5.3zM12 8c2.4 0 3.8-1.3 3.8-2.8 0-1.3-1.2-2.5-2.8-2.5-1.8 0-2.1 2.7-1 5.3z"/></svg>
+        </span>
+        <span class="pf-label">Ưu đãi</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C7C9CE" stroke-width="2.4" stroke-linecap="round"><polyline points="9 6 15 12 9 18"/></svg>
+      </button>
+
+      <div class="pf-block">
+        <button class="pf-plain-row" onclick="soon('Chỉnh sửa thông tin')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.6 7.6 0 000-2l2-1.6-2-3.4-2.4 1a7.6 7.6 0 00-1.7-1L15 3h-4l-.3 2.4a7.6 7.6 0 00-1.7 1l-2.4-1-2 3.4L6.6 11a7.6 7.6 0 000 2l-2 1.6 2 3.4 2.4-1a7.6 7.6 0 001.7 1L11 21h4l.3-2.4a7.6 7.6 0 001.7-1l2.4 1 2-3.4z"/></svg>
+          <span class="pf-plain-label">Chỉnh sửa thông tin</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C7C9CE" stroke-width="2.4" stroke-linecap="round"><polyline points="9 6 15 12 9 18"/></svg>
+        </button>
+
+        <div class="pf-orders-head">
+          <button class="pf-plain-row" style="border:none;padding-bottom:0;" onclick="soon('Đơn hàng')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.8"><path d="M7 3h8l3 3v15H7z"/><path d="M15 3v3h3"/></svg>
+            <span class="pf-plain-label">Đơn hàng</span>
+            <span class="pf-see-all" onclick="event.stopPropagation();soon('Xem tất cả đơn hàng')">Xem tất cả <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A8A8E" stroke-width="2.6" stroke-linecap="round"><polyline points="9 6 15 12 9 18"/></svg></span>
+          </button>
+        </div>
+        <div class="order-icons">
+          <button class="order-icon-item" onclick="soon('Chờ thanh toán')">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8A8A8E" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            <span>Chờ thanh toán</span>
+          </button>
+          <button class="order-icon-item" onclick="soon('Đang xử lý')">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8A8A8E" stroke-width="1.7"><path d="M4 12l6-6 3 3 7-7"/><path d="M20 2h-4v4"/><path d="M4 18h16"/></svg>
+            <span>Đang xử lý</span>
+          </button>
+          <button class="order-icon-item" onclick="soon('Đang giao')">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8A8A8E" stroke-width="1.7"><rect x="2" y="8" width="12" height="8"/><path d="M14 11h4l3 3v2h-7z"/><circle cx="7" cy="18" r="1.6"/><circle cx="18" cy="18" r="1.6"/></svg>
+            <span>Đang giao</span>
+          </button>
+          <button class="order-icon-item" onclick="soon('Đánh giá')">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8A8A8E" stroke-width="1.7"><path d="M12 3l2.6 5.8 6.2.6-4.7 4.2 1.4 6.2L12 16.9 6.5 19.8l1.4-6.2L3.2 9.4l6.2-.6z"/></svg>
+            <span>Đánh giá</span>
+          </button>
+        </div>
+
+        <button class="pf-plain-row" onclick="soon('Lịch sử tích điểm')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+          <span class="pf-plain-label">Lịch sử tích điểm</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C7C9CE" stroke-width="2.4" stroke-linecap="round"><polyline points="9 6 15 12 9 18"/></svg>
+        </button>
+
+        <button class="pf-plain-row" style="border-bottom:none;" onclick="soon('Sổ địa chỉ')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.8"><rect x="5" y="3" width="3" height="18"/><rect x="8" y="3" width="11" height="18" rx="1"/><line x1="12" y1="8" x2="15" y2="8"/><line x1="12" y1="12" x2="15" y2="12"/></svg>
+          <span class="pf-plain-label">Sổ địa chỉ</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C7C9CE" stroke-width="2.4" stroke-linecap="round"><polyline points="9 6 15 12 9 18"/></svg>
+        </button>
+      </div>
+
+      <!-- OA follow -->
+      <div class="oa-banner">
+        <div class="oa-lead">Quan tâm OA để nhận các chương trình đặc quyền ưu đãi</div>
+        <div class="oa-row">
+          <span class="oa-avatar">
+            <svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="9" r="5.5" fill="#fff"/><circle cx="12" cy="17.5" r="4" fill="#fff"/></svg>
+          </span>
+          <span class="oa-name">Hội Viên Mixue
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="#3897F0"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <button class="follow-btn" id="followBtn2" onclick="toggleFollow2()">Quan tâm</button>
+        </div>
+      </div>
+
+      <!-- QR share -->
+      <div class="pf-qr-block">
+        <div class="pf-qr-caption">Chia sẻ mã QR này để kết bạn nhanh chóng, bảo mật</div>
+        <div class="pf-qr-card">
+          <div class="pf-qr-logo">
+            <svg width="34" height="34" viewBox="0 0 24 24"><circle cx="12" cy="9" r="5.5" fill="#fff"/><circle cx="12" cy="17.5" r="4" fill="#fff"/></svg>
+          </div>
+          <div class="pf-qr-title">Hội Viên Mixue</div>
+          <div class="pf-qr-code" id="qrCode"><img src="qr.jpg" alt="QR Hội Viên Mixue" style="width:100%;height:100%;object-fit:contain;border-radius:14px;"></div>
+          <div class="pf-qr-actions">
+            <button class="pf-qr-btn" onclick="soon('Tải xuống mã QR')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="1.9"><path d="M12 4v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>
+              Tải xuống
+            </button>
+            <button class="pf-qr-btn" onclick="soon('Chia sẻ mã QR')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="1.9"><circle cx="6" cy="12" r="2.4"/><circle cx="18" cy="6" r="2.4"/><circle cx="18" cy="18" r="2.4"/><line x1="8.1" y1="10.9" x2="15.9" y2="7.1"/><line x1="8.1" y1="13.1" x2="15.9" y2="16.9"/></svg>
+              Chia sẻ
+            </button>
+          </div>
+        </div>
+        <div class="pf-powered">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#B9BBC0" stroke-width="2.4"><path d="M12 3l7 3v6c0 5-3.4 8-7 9-3.6-1-7-4-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
+          POWERED BY CNV CDP
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /page-profile -->
+
+  <!-- ===== AI CHAT PAGE ("Mixu") ===== -->
+  <div class="page page-ai" id="pageAI">
+    <div class="app-header ai-app-header">
+      <div class="status-row">
+        <span id="clockAI">16:04</span>
+        <span class="icons">
+          <svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="0.5" fill="#fff"/><rect x="4.5" y="5" width="3" height="6" rx="0.5" fill="#fff"/><rect x="9" y="2.5" width="3" height="8.5" rx="0.5" fill="#fff"/><rect x="13" y="0" width="3" height="11" rx="0.5" fill="#fff" opacity=".55"/></svg>
+          <svg width="15" height="11" viewBox="0 0 15 11" fill="none"><path d="M7.5 9.2a1.2 1.2 0 100 2.4 1.2 1.2 0 000-2.4z" fill="#fff"/><path d="M3.7 6.6a5.3 5.3 0 017.6 0l-1.3 1.3a3.5 3.5 0 00-5 0L3.7 6.6z" fill="#fff"/><path d="M0.9 3.8a9.2 9.2 0 0113.2 0L12.8 5A7.4 7.4 0 002.2 5L0.9 3.8z" fill="#fff" opacity=".7"/></svg>
+          <svg width="24" height="11" viewBox="0 0 24 11" fill="none"><rect x="0.5" y="0.5" width="20" height="10" rx="2.5" stroke="#fff" opacity=".6"/><rect x="2" y="2" width="17" height="7" rx="1.2" fill="#fff"/><rect x="21.5" y="3.5" width="1.6" height="4" rx="0.8" fill="#fff" opacity=".6"/></svg>
+        </span>
+      </div>
+      <div class="ai-top-row">
+        <button class="icon-btn" onclick="closeAI()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <span class="ai-top-title">
+          <img class="ai-top-logo" src="logo.jpg" alt="Mixu" onerror="this.style.display='none'">
+          Mixu
+        </span>
+        <button class="icon-btn" onclick="resetAI()">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="ai-body" id="aiBody">
+      <div class="ai-empty" id="aiEmpty">
+        <span class="ai-empty-logo"><img src="logo.jpg" alt="Mixu" onerror="this.parentElement.innerHTML='🐧'"></span>
+        <div class="ai-empty-title">Hôm nay bạn thấy thế nào?</div>
+        <div class="ai-empty-sub">Kể cho Mixu nghe cảm giác của bạn lúc này, mình sẽ gợi ý ngay món hợp nhất</div>
+      </div>
+      <div class="ai-messages" id="aiMessages"></div>
+    </div>
+
+    <div class="ai-saved-row" id="aiSavedRow" style="display:none;"></div>
+
+    <div class="ai-input-area">
+      <div class="ai-input-bar" id="aiInputBar">
+        <input id="aiInputText" placeholder="Nhắn cho Mixu..." onkeydown="if(event.key==='Enter')sendTyped();">
+        <button class="ai-mic-btn" onclick="startVoice()" aria-label="Nhắn bằng giọng nói">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+        </button>
+        <button class="ai-send-btn" onclick="sendTyped()" aria-label="Gửi">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+      <div class="ai-voice-caption" id="voiceCaption"></div>
+      <div class="ai-voice-bar" id="aiVoiceBar" style="display:none;">
+        <button class="ai-voice-cancel" onclick="cancelVoice()" aria-label="Hủy">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+        </button>
+        <span class="ai-voice-bars">
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </span>
+        <button class="ai-voice-finish" onclick="finishVoice()" aria-label="Xong">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
+      </div>
+    </div>
+  </div><!-- /page-ai -->
+
+    <!-- ===== BOTTOM NAV ===== -->
+    <div class="bottom-nav">
+      <button class="nav-item active" id="navHome" onclick="goHome()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/></svg>
+        Trang chủ
+      </button>
+      <button class="nav-item" onclick="soon('Danh mục')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="2.2" rx="1"/><rect x="4" y="11" width="16" height="2.2" rx="1"/><rect x="4" y="17" width="16" height="2.2" rx="1"/></svg>
+        Danh mục
+      </button>
+      <button class="nav-item" onclick="soon('Giỏ hàng')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8h12l-1 12H7z"/><path d="M9 8a3 3 0 016 0"/></svg>
+        Giỏ hàng
+        <span class="nav-badge" id="cartBadge" style="display:none;">0</span>
+      </button>
+      <button class="nav-item" onclick="soon('Tin nhắn')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4a8 8 0 00-6.9 12.1L4 20l4-1a8 8 0 104-15z"/></svg>
+        Tin nhắn
+      </button>
+      <button class="nav-item" id="navProfile" onclick="goProfile(this)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c1.2-4 4.2-6 7-6s5.8 2 7 6"/></svg>
+        Cá nhân
+      </button>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+</div>
+
+<script>
+  /* ---------------- toast ---------------- */
+  let toastTimer;
+  function toast(msg){
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=> el.classList.remove('show'), 1700);
+  }
+  function soon(feature){
+    toast('Tính năng "' + feature + '" đang được phát triển');
+  }
+
+  /* ---------------- real-time clocks (synced across all pages) ---------------- */
+  function updateClocks(){
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2,'0');
+    const mm = String(now.getMinutes()).padStart(2,'0');
+    const timeStr = hh + ':' + mm;
+    ['clockHome','clockProfile','clockAI'].forEach(id=>{
+      const el = document.getElementById(id);
+      if(el) el.textContent = timeStr;
+    });
+  }
+  updateClocks();
+  setInterval(updateClocks, 1000);
+
+  /* ---------------- nav tabs / page switching ---------------- */
+  function setTab(el){
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('scrollArea').scrollTo({top:0, behavior:'smooth'});
+  }
+  function showPage(id){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+  function goHome(){
+    showPage('pageHome');
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    document.getElementById('navHome').classList.add('active');
+    document.getElementById('scrollArea').scrollTo({top:0, behavior:'auto'});
+  }
+  function goProfile(){
+    showPage('pageProfile');
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    document.getElementById('navProfile').classList.add('active');
+    document.getElementById('scrollAreaProfile').scrollTo({top:0, behavior:'auto'});
+  }
+
+  /* ---------------- follow toggle ---------------- */
+  function toggleFollow(){
+    const btn = document.getElementById('followBtn');
+    const following = btn.classList.toggle('followed');
+    btn.textContent = following ? 'Đã quan tâm' : 'Quan tâm';
+    const btn2 = document.getElementById('followBtn2');
+    btn2.classList.toggle('followed', following);
+    btn2.textContent = following ? 'Đã quan tâm' : 'Quan tâm';
+    toast(following ? 'Đã quan tâm Hội Viên Mixue' : 'Đã bỏ quan tâm');
+  }
+  function toggleFollow2(){ toggleFollow(); }
+
+  /* ================= MIXU AI CHAT ================= */
+  const drinkOptions = [
+    {name:'Super Sundae Xoài', img:'1.jpg', time:'Chuẩn bị trong 5-7 phút', price:'25.000 đ', fallback:'linear-gradient(160deg,#FFDA6B,#F2A73A)'},
+    {name:'Trà Chanh Lô Hội', img:'2.jpg', time:'Chuẩn bị trong 3-5 phút', price:'20.000 đ', fallback:'linear-gradient(160deg,#C6E88A,#7EA83E)'},
+    {name:'Dương Chi Cam Lộ', img:'3.jpg', time:'Chuẩn bị trong 4-6 phút', price:'25.000 đ', fallback:'linear-gradient(160deg,#FFC978,#E88A2E)'}
+  ];
+  const CATEGORY_TRA_SUA = [
+    {name:'Trà sữa O-coco', img:'4.jpg', time:'Chuẩn bị trong 4-6 phút', price:'28.000 đ', fallback:'linear-gradient(160deg,#C89468,#6B4226)'},
+    {name:'Trà sữa hoa nhài', img:'5.jpg', time:'Chuẩn bị trong 3-5 phút', price:'20.000 đ', fallback:'linear-gradient(160deg,#BFE07A,#5E9C3E)'},
+    {name:'Dương Chi Cam Lộ', img:'3.jpg', time:'Chuẩn bị trong 4-6 phút', price:'25.000 đ', fallback:'linear-gradient(160deg,#FFC978,#E88A2E)'}
+  ];
+  const CATEGORY_TRA_HOA_QUA = [
+    {name:'Nước chanh tươi lạnh', img:'6.jpg', time:'Chuẩn bị trong 2-4 phút', price:'15.000 đ', fallback:'linear-gradient(160deg,#F5EC7D,#D8C22C)'},
+    {name:'Trà xanh chanh', img:'7.jpg', time:'Chuẩn bị trong 3-5 phút', price:'17.000 đ', fallback:'linear-gradient(160deg,#C3E58F,#6FA23D)'},
+    {name:'Trà Chanh Lô Hội', img:'2.jpg', time:'Chuẩn bị trong 3-5 phút', price:'20.000 đ', fallback:'linear-gradient(160deg,#C6E88A,#7EA83E)'}
+  ];
+  const CATEGORY_KEM = [
+    {name:'Super Sundae Xoài', img:'1.jpg', time:'Chuẩn bị trong 5-7 phút', price:'25.000 đ', fallback:'linear-gradient(160deg,#FFDA6B,#F2A73A)'}
+  ];
+  function pickOptionsForText(text){
+    const t = text.toLowerCase();
+    if(t.includes('trà sữa')) return CATEGORY_TRA_SUA;
+    if(t.includes('trà hoa quả')) return CATEGORY_TRA_HOA_QUA;
+    if(t.includes('kem')) return CATEGORY_KEM;
+    return drinkOptions;
+  }
+  const CATEGORY_INTRO_MSGS = {
+    TRA_SUA: ['Trà sữa béo thơm, nhấp một ngụm là hết mệt liền! Mixu gợi ý cho bạn nè 🧋', 'Đúng gu trà sữa rồi đó! Đây là món Mixu nghĩ bạn sẽ mê 🧋'],
+    TRA_HOA_QUA: ['Trà hoa quả thanh mát, uống vào là tỉnh táo ngay! Thử món này xem sao 🍋', 'Chua chua ngọt ngọt đúng vibe rồi, Mixu chọn giúp bạn món này nhé 🍋'],
+    KEM: ['Kem mát lạnh tan ngay đầu lưỡi, chuẩn bài giải nhiệt luôn 🍦', 'Nói đến kem là Mixu hào hứng liền! Thử ngay món này nha 🍦'],
+    DEFAULT: ['Nóng thế này thì phải làm gì đó mát lạnh mới chịu được! Mixu gợi ý cho bạn nè 🍧', 'Để Mixu "chữa cháy" cho bạn bằng món này nhé, đảm bảo đã khát! ❄️']
+  };
+  function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+  function messageForOptions(options){
+    if(options === CATEGORY_TRA_SUA) return pickRandom(CATEGORY_INTRO_MSGS.TRA_SUA);
+    if(options === CATEGORY_TRA_HOA_QUA) return pickRandom(CATEGORY_INTRO_MSGS.TRA_HOA_QUA);
+    if(options === CATEGORY_KEM) return pickRandom(CATEGORY_INTRO_MSGS.KEM);
+    return pickRandom(CATEGORY_INTRO_MSGS.DEFAULT);
+  }
+  function parsePriceVN(str){ return parseInt(String(str).replace(/[^\d]/g,''),10) || 0; }
+  function formatVND(n){ return n.toLocaleString('vi-VN') + 'đ'; }
+  let sugCounter = 0;
+  const suggestionState = {};
+  let pendingStage = null; // {type:'prefs'|'address_initial'|'address_confirm'|'payment_choose'|'payment_confirm'|'cancel_reason'|'cancel_confirm', ...}
+
+  const toppingDefs = [
+    {id:'oreo', label:'Vụn Oreo', kw:['vụn oreo','oreo']},
+    {id:'tctrang', label:'Trân châu trắng', kw:['trân châu trắng']},
+    {id:'tc', label:'Trân châu', kw:['trân châu']},
+    {id:'dua', label:'Thạch dừa', kw:['thạch dừa']},
+    {id:'lohoi', label:'Lô hội', kw:['lô hội','nha đam']},
+    {id:'thduongden', label:'Thạch đường đen', kw:['thạch đường đen','đường đen']},
+    {id:'thdao', label:'Thạch đào', kw:['thạch đào']}
+  ];
+  const prefState = {};
+  const ratingState = {};
+  const DEFAULT_ADDRESS = 'Cơ sở B - Đại học Kinh tế TP.HCM (UEH Campus B), 279 Nguyễn Tri Phương, Q.10, TP.HCM';
+  const STORE_ADDRESS = 'Cửa hàng Mixue gần nhất - 279 Nguyễn Tri Phương, Q.10, TP.HCM';
+  const orderCtx = { drink:null, isSundae:false, prefs:null, address:DEFAULT_ADDRESS, payment:null, totalPrice:0, voucher:null };
+
+  /* ---------------- vouchers ---------------- */
+  const VOUCHERS = [
+    {code:'GIAM10', label:'Giảm 10%', desc:'Giảm 10% cho đơn từ 15.000đ', type:'percent', value:10, minOrder:15000},
+    {code:'GIAM5K', label:'Giảm 5.000đ', desc:'Giảm ngay 5.000đ cho mọi đơn hàng', type:'flat', value:5000, minOrder:0},
+    {code:'GIAM15', label:'Giảm 15%', desc:'Giảm 15% cho đơn từ 30.000đ', type:'percent', value:15, minOrder:30000}
+  ];
+  function askVoucher(){
+    withThinking(()=>{
+      const applicable = VOUCHERS.filter(v => orderCtx.totalPrice >= v.minOrder);
+      if(!applicable.length){ askAddressInitial(); return; }
+      appendAIText('Mixu đang có vài ưu đãi hay ho nè, bạn dùng thử một cái xem sao? 🎁');
+      const uid = 'voucher' + (++sugCounter);
+      appendAICard(`
+        <div class="ai-info-card" id="${uid}">
+          <div class="ai-info-title">Chọn voucher áp dụng</div>
+          <div class="ai-voucher-list">
+            ${applicable.map(v => `<button class="ai-voucher-item" onclick="applyVoucherBtn('${v.code}')">
+              <span class="ai-voucher-badge">${v.type==='percent' ? '-'+v.value+'%' : '-'+formatVND(v.value)}</span>
+              <span class="ai-voucher-text"><b>${v.label}</b><span>${v.desc}</span></span>
+            </button>`).join('')}
+          </div>
+          <button class="ai-btn-cancel" style="width:100%;margin-top:10px;" onclick="skipVoucherBtn()">Không dùng voucher</button>
+        </div>`);
+      pendingStage = {type:'voucher_choose', applicable};
+    }, 500);
+  }
+  function applyVoucherBtn(code){
+    const v = VOUCHERS.find(x => x.code === code);
+    appendUserBubble(v ? v.label : code);
+    applyVoucher(v);
+  }
+  function skipVoucherBtn(){
+    appendUserBubble('Không dùng voucher');
+    pendingStage = null;
+    askAddressInitial();
+  }
+  function applyVoucher(v){
+    pendingStage = null;
+    if(!v){ askAddressInitial(); return; }
+    const before = orderCtx.totalPrice;
+    let discount = v.type === 'percent' ? Math.round(before * v.value / 100) : v.value;
+    discount = Math.min(discount, before);
+    orderCtx.totalPrice = before - discount;
+    orderCtx.voucher = v;
+    withThinking(()=>{
+      appendAIText('Đã áp dụng <b>' + v.label + '</b>: -' + formatVND(discount) + '.<br>Tổng thanh toán còn: <b>' + formatVND(orderCtx.totalPrice) + '</b> 🎉');
+      askAddressInitial();
+    }, 500);
+  }
+
+  /* ---------------- saved drinks (save prefs once, reorder in one tap) ---------------- */
+  let savedDrinks = [];
+  try{
+    const raw = localStorage.getItem('mixu_saved_drinks');
+    if(raw) savedDrinks = JSON.parse(raw);
+  }catch(e){ savedDrinks = []; }
+
+  function persistSaved(){
+    try{ localStorage.setItem('mixu_saved_drinks', JSON.stringify(savedDrinks)); }catch(e){}
+  }
+
+  function renderSavedChips(){
+    const row = document.getElementById('aiSavedRow');
+    if(!savedDrinks.length){
+      row.style.display = 'none';
+      row.innerHTML = '';
+      return;
+    }
+    row.style.display = 'flex';
+    row.innerHTML = savedDrinks.map(s => `
+      <span class="ai-saved-chip">
+        <button class="icon" onclick="reorderSaved('${s.id}')" title="Đặt lại ${s.name}">⚡</button>
+        <button class="txt" style="background:none;border:none;padding:0;text-align:left;" onclick="reorderSaved('${s.id}')">
+          <b>${s.name}</b>
+          <span>${formatVND(s.totalPrice)}</span>
+        </button>
+        <button class="remove" onclick="event.stopPropagation();removeSaved('${s.id}')" aria-label="Xoá">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+        </button>
+      </span>`).join('');
+  }
+
+  function saveCurrentDrink(btnEl){
+    if(!orderCtx.drink) return;
+    const summary = buildPrefSummary(orderCtx.prefs, orderCtx.isSundae);
+    const existingIdx = savedDrinks.findIndex(s => s.name === orderCtx.drink && s.summary === summary);
+    const entry = {
+      id: existingIdx >= 0 ? savedDrinks[existingIdx].id : 'saved' + Date.now(),
+      name: orderCtx.drink,
+      isSundae: orderCtx.isSundae,
+      prefs: JSON.parse(JSON.stringify(orderCtx.prefs)),
+      summary,
+      totalPrice: orderCtx.totalPrice
+    };
+    if(existingIdx >= 0) savedDrinks[existingIdx] = entry;
+    else savedDrinks.unshift(entry);
+    if(savedDrinks.length > 8) savedDrinks = savedDrinks.slice(0,8);
+    persistSaved();
+    renderSavedChips();
+    toast('Đã lưu ' + orderCtx.drink + ' để đặt nhanh lần sau ⭐');
+    if(btnEl){ btnEl.textContent = '✅ Đã lưu món này'; btnEl.disabled = true; }
+  }
+
+  function removeSaved(id){
+    savedDrinks = savedDrinks.filter(s => s.id !== id);
+    persistSaved();
+    renderSavedChips();
+    toast('Đã xoá khỏi danh sách đặt nhanh');
+  }
+
+  function reorderSaved(id){
+    const item = savedDrinks.find(s => s.id === id);
+    if(!item) return;
+    hideEmptyState();
+    appendUserBubble('⚡ Đặt lại: ' + item.name);
+    orderCtx.drink = item.name;
+    orderCtx.isSundae = item.isSundae;
+    orderCtx.prefs = item.prefs;
+    orderCtx.totalPrice = item.totalPrice;
+    orderCtx.voucher = null;
+    withThinking(()=>{
+      appendAIText(`Món quen thuộc đây rồi! <b>${item.name}</b>: ${item.summary}.<br>Tổng giá: <b>${formatVND(item.totalPrice)}</b>`);
+      askVoucher();
+    }, 900);
+  }
+
+  function isConfirmPhrase(text){
+    const t = text.trim().toLowerCase();
+    const kws = ['chọn','xác nhận','ok','oke','okay','đồng ý','được rồi','đúng rồi','giữ nguyên'];
+    return kws.some(k => t === k || t.startsWith(k + ' ') || t.startsWith(k + ','));
+  }
+
+  function openAI(){
+    showPage('pageAI');
+    renderSavedChips();
+  }
+  function closeAI(){
+    goHome();
+  }
+  function resetAI(){
+    document.getElementById('aiMessages').innerHTML = '';
+    document.getElementById('aiEmpty').style.display = 'flex';
+    document.getElementById('aiInputText').value = '';
+    pendingStage = null;
+    orderCtx.drink = null; orderCtx.isSundae = false; orderCtx.prefs = null; orderCtx.payment = null; orderCtx.voucher = null;
+    cancelVoice();
+    toast('Đã bắt đầu cuộc trò chuyện mới');
+  }
+  function scrollAIBottom(){
+    const body = document.getElementById('aiBody');
+    requestAnimationFrame(()=> body.scrollTo({top: body.scrollHeight, behavior:'smooth'}));
+  }
+  function hideEmptyState(){
+    document.getElementById('aiEmpty').style.display = 'none';
+  }
+
+  function sendTyped(){
+    const inp = document.getElementById('aiInputText');
+    const text = inp.value.trim();
+    if(!text) return;
+    inp.value = '';
+    handleUserMessage(text);
+  }
+
+  function appendUserBubble(text){
+    hideEmptyState();
+    const wrap = document.getElementById('aiMessages');
+    const userRow = document.createElement('div');
+    userRow.className = 'ai-msg-row user';
+    userRow.innerHTML = `<div class="ai-bubble user">${text.replace(/</g,'&lt;')}</div>`;
+    wrap.appendChild(userRow);
+    scrollAIBottom();
+  }
+
+  function appendAIText(html){
+    const wrap = document.getElementById('aiMessages');
+    const row = document.createElement('div');
+    row.className = 'ai-msg-row ai';
+    row.innerHTML = `
+      <span class="ai-avatar-sm"><img src="logo.jpg" onerror="this.parentElement.textContent='🐧'"></span>
+      <div class="ai-bubble ai-text">${html}</div>`;
+    wrap.appendChild(row);
+    scrollAIBottom();
+    return row;
+  }
+
+  function appendAICard(innerHtml, id){
+    const wrap = document.getElementById('aiMessages');
+    const row = document.createElement('div');
+    row.className = 'ai-msg-row ai';
+    if(id) row.id = id;
+    row.innerHTML = `
+      <span class="ai-avatar-sm"><img src="logo.jpg" onerror="this.parentElement.textContent='🐧'"></span>
+      ${innerHtml}`;
+    wrap.appendChild(row);
+    scrollAIBottom();
+    return row;
+  }
+
+  /* ---------------- generic "thinking" pause before any AI response ---------------- */
+  function showThinking(){
+    const wrap = document.getElementById('aiMessages');
+    const id = 'think' + (++sugCounter);
+    const row = document.createElement('div');
+    row.className = 'ai-msg-row ai';
+    row.id = id;
+    row.innerHTML = `
+      <span class="ai-avatar-sm"><img src="logo.jpg" onerror="this.parentElement.textContent='🐧'"></span>
+      <div class="ai-bubble ai-text ai-thinking"><span></span><span></span><span></span></div>`;
+    wrap.appendChild(row);
+    scrollAIBottom();
+    return id;
+  }
+  function withThinking(fn, delay){
+    const tid = showThinking();
+    setTimeout(()=>{
+      const row = document.getElementById(tid);
+      if(row) row.remove();
+      fn();
+    }, delay || 600);
+  }
+
+  function handleUserMessage(text){
+    if(pendingStage){
+      appendUserBubble(text);
+      routeStageMessage(text);
+      return;
+    }
+
+    hideEmptyState();
+    appendUserBubble(text);
+    const options = pickOptionsForText(text);
+    withThinking(()=>{
+      appendAIText(messageForOptions(options));
+      appendSuggestionCard(options);
+    }, 1300);
+  }
+
+  function routeStageMessage(text){
+    const stage = pendingStage;
+    const confirmed = isConfirmPhrase(text);
+
+    if(stage.type === 'prefs'){
+      if(!confirmed){
+        const parsed = parsePrefs(text);
+        prefState[stage.uid] = parsed;
+        renderPrefChips(stage.uid, stage.isSundae);
+      }
+      finalizePrefs(stage.uid, stage.drinkName, stage.isSundae);
+
+    } else if(stage.type === 'address_initial'){
+      if(!confirmed){ orderCtx.address = text.trim(); }
+      askAddressConfirm();
+
+    } else if(stage.type === 'address_confirm'){
+      if(confirmed){
+        proceedAddressConfirmed();
+      } else {
+        orderCtx.address = text.trim();
+        askAddressConfirm();
+      }
+
+    } else if(stage.type === 'payment_choose'){
+      const t = text.toLowerCase();
+      if(/ngân hàng|banking|chuyển khoản|thẻ/.test(t)) selectPayment('bank');
+      else if(/tiền mặt|cash/.test(t)) selectPayment('cash');
+      else if(confirmed) selectPayment('cash');
+      else withThinking(()=> appendAIText('Bạn muốn thanh toán bằng <b>tiền mặt</b> hay <b>ngân hàng</b>? Gõ, nói tên phương thức, hoặc bấm nút bên trên nhé.'));
+
+    } else if(stage.type === 'payment_confirm'){
+      if(confirmed){
+        confirmPayment();
+      } else {
+        const t = text.toLowerCase();
+        if(/ngân hàng|banking|chuyển khoản|thẻ/.test(t)) selectPayment('bank');
+        else if(/tiền mặt|cash/.test(t)) selectPayment('cash');
+        else withThinking(()=> appendAIText('Gõ hoặc nói "chọn"/"xác nhận"/"ok" để xác nhận thanh toán bằng ' + (orderCtx.payment==='bank'?'ngân hàng':'tiền mặt') + ' nhé.'));
+      }
+
+    } else if(stage.type === 'voucher_choose'){
+      const t = text.toLowerCase();
+      const found = stage.applicable.find(v => t.includes(v.label.toLowerCase()) || t.includes(v.code.toLowerCase()));
+      if(found){
+        applyVoucher(found);
+      } else if(/không|khỏi|bỏ qua|skip|thôi/.test(t)){
+        pendingStage = null;
+        askAddressInitial();
+      } else {
+        withThinking(()=> appendAIText('Bạn muốn dùng voucher nào, hay bỏ qua? Gõ tên voucher hoặc bấm nút bên trên nhé.'));
+      }
+
+    } else if(stage.type === 'cancel_reason'){
+      const reason = confirmed ? 'Không có lý do cụ thể' : text.trim();
+      proceedCancelReason(reason);
+
+    } else if(stage.type === 'cancel_confirm'){
+      if(confirmed){
+        confirmCancelFinal();
+      } else {
+        abortCancel();
+      }
+    }
+  }
+
+  function appendSuggestionCard(options){
+    const uid = 'sug' + (++sugCounter);
+    suggestionState[uid] = { list: options, idx: 0 };
+    const showNext = options.length > 1;
+    appendAICard(`
+      <div class="ai-sugg-card" id="${uid}">
+        <div class="ai-sugg-label">MIXU GỢI Ý CHO BẠN</div>
+        <div class="ai-sugg-img" id="${uid}-imgwrap"><img id="${uid}-img" alt="" style="display:none;" onload="this.style.display='block';" onerror="this.style.display='none';"></div>
+        <div class="ai-sugg-info">
+          <span class="ai-sugg-name" id="${uid}-name"></span>
+          <span class="ai-sugg-price-row">
+            <span class="ai-sugg-price" id="${uid}-price"></span>
+            <span class="ai-sugg-time">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              <span id="${uid}-time"></span>
+            </span>
+          </span>
+        </div>
+        <div class="ai-sugg-actions">
+          ${showNext ? `<button class="ai-btn-next" onclick="nextOption('${uid}')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+            Món khác
+          </button>` : ''}
+          <button class="ai-btn-choose" onclick="chooseOption('${uid}')" style="${showNext ? '' : 'flex:1;'}">Chọn món này</button>
+        </div>
+      </div>`);
+    updateSuggestionCard(uid);
+    return uid;
+  }
+
+  function updateSuggestionCard(uid){
+    const st = suggestionState[uid];
+    const d = st.list[st.idx];
+    document.getElementById(uid+'-imgwrap').style.background = d.fallback;
+    const imgEl = document.getElementById(uid+'-img');
+    imgEl.style.display = 'none';
+    imgEl.src = d.img;
+    document.getElementById(uid+'-name').textContent = d.name;
+    document.getElementById(uid+'-price').textContent = d.price;
+    document.getElementById(uid+'-time').textContent = d.time;
+  }
+  function nextOption(uid){
+    const st = suggestionState[uid];
+    st.idx = (st.idx + 1) % st.list.length;
+    updateSuggestionCard(uid);
+  }
+  function chooseOption(uid){
+    const st = suggestionState[uid];
+    const d = st.list[st.idx];
+    toast('Đã chọn ' + d.name + ' 🎉');
+    withThinking(()=> showPrefsCard(d.name, d.price), 500);
+  }
+
+  /* ---------------- drink customization (sugar / ice / topping) ---------------- */
+  function defaultPrefs(){
+    return { sugar:100, temp:'Đá bình thường', toppings:[] };
+  }
+
+  /* AI-picked preset per drink — deliberately different from the plain defaults above */
+  const MIXU_SUGGESTIONS = {
+    'Super Sundae Xoài': { toppings:['dua'], note:'thêm thạch dừa cho giòn giòn, hợp với xoài chua ngọt' },
+    'Trà Chanh Lô Hội': { sugar:50, temp:'Ít đá', toppings:['tctrang'], note:'giảm ngọt còn 50%, ít đá và thêm trân châu trắng cho vui miệng' },
+    'Dương Chi Cam Lộ': { sugar:70, temp:'Đá bình thường', toppings:['thdao'], note:'70% đường và thêm thạch đào cho dậy vị cam' },
+    'Trà sữa O-coco': { sugar:70, temp:'Đá bình thường', toppings:['oreo'], note:'70% đường, thêm vụn Oreo cho beo béo giòn giòn' },
+    'Trà sữa hoa nhài': { sugar:30, temp:'Ít đá', toppings:[], note:'giảm còn 30% đường để giữ trọn hương hoa nhài thanh nhẹ' },
+    'Nước chanh tươi lạnh': { sugar:50, temp:'Đá bình thường', toppings:[], note:'50% đường cho vừa chua vừa ngọt, dễ uống' },
+    'Trà xanh chanh': { sugar:30, temp:'Ít đá', toppings:['tc'], note:'giảm ngọt còn 30%, thêm trân châu cho đỡ nhạt miệng' }
+  };
+  function getMixuSuggestion(drinkName){
+    return MIXU_SUGGESTIONS[drinkName] || { sugar:70, temp:'Ít đá', toppings:[], note:'giảm nhẹ độ ngọt và bớt đá để dễ uống hơn' };
+  }
+
+  function showPrefsCard(drinkName, price){
+    const isSundae = /sundae/i.test(drinkName);
+    const uid = 'pref' + (++sugCounter);
+    prefState[uid] = defaultPrefs();
+    prefState[uid].basePrice = parsePriceVN(price);
+    const hint = isSundae
+      ? `Bạn muốn thêm topping gì cho <b>${drinkName}</b> không? Gõ hoặc nói tên topping, hoặc chọn bên dưới.`
+      : `Bạn muốn tuỳ chỉnh <b>${drinkName}</b> như thế nào? Có thể gõ hoặc nói thẳng, ví dụ "50% đường, ít đá, thêm trân châu" — hoặc chọn bên dưới.`;
+    appendAIText(hint);
+    const sugarTempHtml = isSundae ? '' : `
+        <div class="ai-pref-group">
+          <div class="ai-pref-label">Đường</div>
+          <div class="ai-pref-options" id="${uid}-sugar"></div>
+        </div>
+        <div class="ai-pref-group">
+          <div class="ai-pref-label">Đá</div>
+          <div class="ai-pref-options" id="${uid}-temp"></div>
+        </div>`;
+    appendAICard(`
+      <div class="ai-pref-card" id="${uid}">
+        <div class="ai-pref-title">Tuỳ chỉnh cho ${drinkName}</div>
+        <button class="ai-pref-ai-btn" onclick="applyAISuggestion('${uid}','${drinkName.replace(/'/g,"")}',${isSundae})">✨ Để Mixu chọn giúp bạn</button>
+        ${sugarTempHtml}
+        <div class="ai-pref-group">
+          <div class="ai-pref-label">Topping <span class="ai-pref-hint">(tối đa 2, 3.000đ/món)</span></div>
+          <div class="ai-pref-options" id="${uid}-topping"></div>
+        </div>
+        <button class="ai-btn-choose ai-pref-confirm" onclick="confirmPrefsBtn('${uid}','${drinkName.replace(/'/g,"")}',${isSundae})">Xác nhận</button>
+      </div>`);
+    renderPrefChips(uid, isSundae);
+    pendingStage = {type:'prefs', uid, drinkName, isSundae};
+  }
+
+  function applyAISuggestion(uid, drinkName, isSundae){
+    const suggestion = getMixuSuggestion(drinkName);
+    const basePrice = prefState[uid].basePrice;
+    prefState[uid] = Object.assign(defaultPrefs(), suggestion, { basePrice });
+    renderPrefChips(uid, isSundae);
+    withThinking(()=> appendAIText('✨ Mixu gợi ý bạn nên ' + suggestion.note + '. Bạn có thể chỉnh lại hoặc bấm <b>Xác nhận</b> nếu thích nhé!'), 450);
+  }
+
+  function renderPrefChips(uid, isSundae){
+    const s = prefState[uid];
+    const sugarEl = document.getElementById(uid+'-sugar');
+    if(sugarEl){
+      sugarEl.innerHTML = [0,30,50,70,100].map(v =>
+        `<button class="ai-pref-chip ${s.sugar===v?'selected':''}" onclick="selectSugar('${uid}',${v})">${v}%</button>`
+      ).join('');
+    }
+    const tempEl = document.getElementById(uid+'-temp');
+    if(tempEl){
+      tempEl.innerHTML = ['Đá bình thường','Ít đá','Không đá'].map(t =>
+        `<button class="ai-pref-chip ${s.temp===t?'selected':''}" onclick="selectTemp('${uid}','${t}')">${t}</button>`
+      ).join('');
+    }
+    document.getElementById(uid+'-topping').innerHTML = toppingDefs.map(t =>
+      `<button class="ai-pref-chip ${s.toppings.includes(t.id)?'selected':''}" onclick="toggleTopping('${uid}','${t.id}')">${t.label}</button>`
+    ).join('');
+  }
+  function selectSugar(uid, val){
+    prefState[uid].sugar = val;
+    renderPrefChips(uid);
+  }
+  function selectTemp(uid, val){
+    prefState[uid].temp = val;
+    renderPrefChips(uid);
+  }
+  function toggleTopping(uid, id){
+    const s = prefState[uid];
+    const i = s.toppings.indexOf(id);
+    if(i >= 0){
+      s.toppings.splice(i,1);
+    } else {
+      if(s.toppings.length >= 2){
+        toast('Chỉ được chọn tối đa 2 loại topping');
+        return;
+      }
+      s.toppings.push(id);
+    }
+    renderPrefChips(uid);
+  }
+  function buildPrefSummary(s, isSundae){
+    const toppingLabels = s.toppings.map(id => toppingDefs.find(t=>t.id===id)?.label).filter(Boolean);
+    const parts = [];
+    if(!isSundae){
+      parts.push(s.sugar + '% đường');
+      parts.push(s.temp.toLowerCase());
+    }
+    if(toppingLabels.length){
+      parts.push('thêm ' + toppingLabels.join(' & ') + ' (+' + (toppingLabels.length*3000).toLocaleString('vi-VN') + 'đ)');
+    } else {
+      parts.push('không topping');
+    }
+    return parts.join(', ');
+  }
+  function confirmPrefsBtn(uid, drinkName, isSundae){
+    appendUserBubble('Xác nhận lựa chọn');
+    finalizePrefs(uid, drinkName, isSundae);
+  }
+  function finalizePrefs(uid, drinkName, isSundae){
+    const s = prefState[uid];
+    orderCtx.drink = drinkName;
+    orderCtx.isSundae = isSundae;
+    orderCtx.prefs = s;
+    orderCtx.voucher = null;
+    const total = computeTotalPrice(s.basePrice, s);
+    orderCtx.totalPrice = total;
+    pendingStage = null;
+    withThinking(()=>{
+      appendAIText('Đã chốt <b>' + drinkName + '</b>: ' + buildPrefSummary(s, isSundae) + '.<br>Tổng giá: <b>' + formatVND(total) + '</b>');
+      appendAICard(`
+        <div class="ai-info-card" style="padding:14px 16px;">
+          <button class="ai-save-btn" onclick="saveCurrentDrink(this)">💾 Lưu món này để đặt nhanh lần sau</button>
+        </div>`);
+      askVoucher();
+    });
+  }
+  function computeTotalPrice(basePrice, prefs){
+    const toppingCost = (prefs.toppings ? prefs.toppings.length : 0) * 3000;
+    return (basePrice || 0) + toppingCost;
+  }
+
+  function parsePrefs(text){
+    const t = text.toLowerCase();
+    const result = defaultPrefs();
+
+    const sugarMatch = t.match(/\b(100|70|50|30|0)\s*%?/);
+    if(sugarMatch && [0,30,50,70,100].includes(parseInt(sugarMatch[1],10))){
+      result.sugar = parseInt(sugarMatch[1],10);
+    } else if(/không\s*đường/.test(t)){
+      result.sugar = 0;
+    }
+
+    if(/không\s*đá/.test(t)){
+      result.temp = 'Không đá';
+    } else if(/ít\s*đá/.test(t)){
+      result.temp = 'Ít đá';
+    } else if(/đá/.test(t)){
+      result.temp = 'Đá bình thường';
+    }
+
+    let working = t;
+    const found = [];
+    toppingDefs.forEach(def => {
+      const hit = def.kw.some(kw => working.includes(kw));
+      if(hit){
+        found.push(def.id);
+        def.kw.forEach(kw => { working = working.replace(kw, ''); });
+      }
+    });
+    result.toppings = found.slice(0,2);
+
+    return result;
+  }
+
+  /* ---------------- shipping address (pretend Google Maps integration) ---------------- */
+  function addressMapURL(address){
+    return 'https://www.google.com/maps?q=' + encodeURIComponent(address) + '&output=embed';
+  }
+  function showAddressCard(mode){
+    const addr = orderCtx.address;
+    const isAsk = mode === 'ask';
+    appendAICard(`
+      <div class="ai-info-card">
+        <div class="ai-info-title">${isAsk ? 'Giao hàng đến đâu?' : 'Xác nhận địa chỉ giao hàng'}</div>
+        <div class="ai-address-text">📍 ${addr}</div>
+        <div class="ai-map-frame"><iframe src="${addressMapURL(addr)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+        <div class="ai-option-row">
+          ${isAsk
+            ? `<button class="ai-option-btn" onclick="keepAddressBtn()">Giữ địa chỉ này</button>`
+            : `<button class="ai-btn-choose" style="flex:1" onclick="confirmAddressBtn()">Xác nhận</button>`}
+        </div>
+        ${isAsk ? '<div style="font-size:12px;color:var(--sub);margin-top:8px;">Hoặc gõ / nói địa chỉ khác bạn muốn giao đến.</div>' : ''}
+      </div>`);
+  }
+  function askAddressInitial(){
+    withThinking(()=>{
+      appendAIText('Địa chỉ giao hàng hiện tại là <b>' + orderCtx.address + '</b>. Bạn có muốn đổi sang địa chỉ khác không?');
+      showAddressCard('ask');
+      pendingStage = {type:'address_initial'};
+    });
+  }
+  function keepAddressBtn(){
+    appendUserBubble('Giữ địa chỉ này');
+    askAddressConfirm();
+  }
+  function askAddressConfirm(){
+    withThinking(()=>{
+      appendAIText('Bạn xác nhận giao đến địa chỉ: <b>' + orderCtx.address + '</b>?');
+      showAddressCard('confirm');
+      pendingStage = {type:'address_confirm'};
+    });
+  }
+  function confirmAddressBtn(){
+    appendUserBubble('Xác nhận địa chỉ');
+    proceedAddressConfirmed();
+  }
+  function proceedAddressConfirmed(){
+    withThinking(()=>{
+      appendAIText('Đã xác nhận địa chỉ giao hàng: <b>' + orderCtx.address + '</b>.');
+      pendingStage = null;
+      askPayment();
+    });
+  }
+
+  /* ---------------- payment method ---------------- */
+  function askPayment(){
+    withThinking(()=>{
+      const uid = 'pay' + (++sugCounter);
+      appendAICard(`
+        <div class="ai-info-card" id="${uid}">
+          <div class="ai-info-title">Bạn muốn thanh toán bằng hình thức nào?</div>
+          <div class="ai-option-row">
+            <button class="ai-option-btn" id="${uid}-cash" onclick="selectPaymentBtn('cash')">💵<br>Tiền mặt</button>
+            <button class="ai-option-btn" id="${uid}-bank" onclick="selectPaymentBtn('bank')">🏦<br>Ngân hàng</button>
+          </div>
+        </div>`, 'paymentChoiceRow');
+      pendingStage = {type:'payment_choose'};
+    });
+  }
+  function selectPaymentBtn(method){
+    appendUserBubble(method === 'bank' ? 'Ngân hàng' : 'Tiền mặt');
+    selectPayment(method);
+  }
+  function selectPayment(method){
+    withThinking(()=>{
+      orderCtx.payment = method;
+      const row = document.getElementById('paymentChoiceRow');
+      if(row){
+        row.querySelectorAll('.ai-option-btn').forEach(b => b.classList.remove('selected'));
+        const activeBtn = row.querySelector(method === 'bank' ? '[onclick*="\'bank\'"]' : '[onclick*="\'cash\'"]');
+        if(activeBtn) activeBtn.classList.add('selected');
+      }
+      const confirmInner = `
+        <div class="ai-info-title">Xác nhận thanh toán bằng ${method==='bank' ? 'Ngân hàng (liên kết)' : 'Tiền mặt'}?</div>
+        <button class="ai-btn-choose" style="width:100%" onclick="confirmPaymentBtn()">Xác nhận</button>`;
+      const existing = document.getElementById('paymentConfirmCard');
+      if(existing){
+        existing.innerHTML = confirmInner;
+        scrollAIBottom();
+      } else {
+        appendAICard(`<div class="ai-info-card" id="paymentConfirmCard">${confirmInner}</div>`);
+      }
+      pendingStage = {type:'payment_confirm'};
+    }, 450);
+  }
+  function confirmPaymentBtn(){
+    appendUserBubble('Xác nhận thanh toán');
+    confirmPayment();
+  }
+  function confirmPayment(){
+    withThinking(()=>{
+      if(orderCtx.payment === 'bank'){
+        appendAIText('✅ Đã thanh toán tự động từ tài khoản ngân hàng liên kết của bạn.');
+      } else {
+        appendAIText('✅ Bạn sẽ thanh toán tiền mặt khi nhận hàng.');
+      }
+      pendingStage = null;
+      searchDriver();
+    });
+  }
+
+  /* ---------------- driver search & delivery progress ---------------- */
+  function searchDriver(){
+    const rid = 'drv' + (++sugCounter);
+    appendAICard(`<div class="ai-bubble ai-text"><div class="ai-loading-row"><span class="ai-spinner"></span>Đang tìm tài xế gần bạn...</div></div>`, rid);
+    setTimeout(()=> showDriverFound(rid), 2200);
+  }
+  function showDriverFound(rowId){
+    const row = document.getElementById(rowId);
+    if(!row) return;
+    row.innerHTML = `
+      <span class="ai-avatar-sm"><img src="logo.jpg" onerror="this.parentElement.textContent='🐧'"></span>
+      <div class="ai-driver-card" id="driverCard">
+        <div class="ai-driver-head">
+          <span class="ai-driver-avatar">🛵</span>
+          <span class="ai-driver-info">
+            <div class="ai-driver-name">Anh Trần Văn Nam</div>
+            <div class="ai-driver-sub">⭐ 4.9 · Honda Wave · 59-P1 123.45</div>
+          </span>
+        </div>
+        <div class="ai-progress-steps">
+          <span class="step done">Nhận đơn</span><span class="step done">Lấy hàng</span><span class="step">Đang giao</span><span class="step">Hoàn tất</span>
+        </div>
+        <div class="ai-progress-bar"><div class="ai-progress-bar-fill" style="width:45%"></div></div>
+        <div class="ai-driver-actions">
+          <button onclick="soon('Nhắn tin tài xế')">💬 Chat</button>
+          <button onclick="soon('Gọi tài xế')">📞 Gọi</button>
+          <button onclick="soon('Ghi chú cho tài xế')">📝 Ghi chú</button>
+        </div>
+        <div class="ai-order-actions">
+          <button class="ai-btn-cancel" onclick="cancelOrder()">Huỷ đơn</button>
+          <button class="ai-btn-receive" onclick="receiveOrder()">Đã nhận hàng</button>
+        </div>
+      </div>`;
+    scrollAIBottom();
+    appendAIText('Mixu đã tìm thấy tài xế cho bạn! 🎉 Tài xế đang đến cửa hàng Mixue gần bạn nhất để lấy đồ uống.');
+  }
+
+  const CANCEL_REASONS = ['Đổi ý, không muốn nữa','Chờ lâu quá','Đặt nhầm món','Lý do khác'];
+  function cancelOrder(){
+    const card = document.getElementById('driverCard');
+    if(card){
+      const actions = card.querySelector('.ai-order-actions');
+      if(actions) actions.innerHTML = '';
+    }
+    withThinking(()=>{
+      appendAIText('Bạn muốn huỷ đơn vì lý do gì? Gõ hoặc nói lý do, hoặc chọn nhanh bên dưới.');
+      appendAICard(`
+        <div class="ai-info-card">
+          <div class="ai-pref-options">
+            ${CANCEL_REASONS.map(r => `<button class="ai-pref-chip" onclick="selectCancelReasonBtn('${r.replace(/'/g,"")}')">${r}</button>`).join('')}
+          </div>
+        </div>`);
+      pendingStage = {type:'cancel_reason'};
+    });
+  }
+  function selectCancelReasonBtn(reason){
+    appendUserBubble(reason);
+    proceedCancelReason(reason);
+  }
+  function proceedCancelReason(reason){
+    orderCtx.cancelReason = reason;
+    withThinking(()=>{
+      appendAIText('Bạn chắc chắn muốn huỷ đơn hàng với lý do: <b>' + reason + '</b>?');
+      appendAICard(`
+        <div class="ai-info-card">
+          <div class="ai-option-row">
+            <button class="ai-btn-cancel" onclick="abortCancelBtn()">Không huỷ</button>
+            <button class="ai-btn-choose" style="flex:1.3" onclick="confirmCancelBtn()">Xác nhận huỷ</button>
+          </div>
+        </div>`);
+      pendingStage = {type:'cancel_confirm'};
+    });
+  }
+  function restoreDriverActions(){
+    const card = document.getElementById('driverCard');
+    if(!card) return;
+    const actions = card.querySelector('.ai-order-actions');
+    if(actions && !actions.innerHTML.trim()){
+      actions.innerHTML = '<button class="ai-btn-cancel" onclick="cancelOrder()">Huỷ đơn</button><button class="ai-btn-receive" onclick="receiveOrder()">Đã nhận hàng</button>';
+    }
+  }
+  function abortCancelBtn(){
+    appendUserBubble('Không huỷ');
+    abortCancel();
+  }
+  function abortCancel(){
+    pendingStage = null;
+    withThinking(()=>{
+      restoreDriverActions();
+      appendAIText('Mixu vẫn tiếp tục giao đơn hàng của bạn nhé! 🚴');
+    });
+  }
+  function confirmCancelBtn(){
+    appendUserBubble('Xác nhận huỷ');
+    confirmCancelFinal();
+  }
+  function confirmCancelFinal(){
+    pendingStage = null;
+    const rid = 'cancel' + (++sugCounter);
+    appendAICard(`<div class="ai-bubble ai-text"><div class="ai-loading-row"><span class="ai-spinner"></span>Đang huỷ đơn hàng...</div></div>`, rid);
+    setTimeout(()=>{
+      const r = document.getElementById(rid);
+      let msg = 'Đơn hàng đã được huỷ.';
+      if(orderCtx.payment === 'bank') msg += ' Số tiền đã được hoàn về tài khoản ngân hàng của bạn.';
+      if(r) r.innerHTML = `<span class="ai-avatar-sm"><img src="logo.jpg" onerror="this.parentElement.textContent='🐧'"></span><div class="ai-bubble ai-text">${msg}</div>`;
+      scrollAIBottom();
+      setTimeout(()=>{
+        appendAIText('Bạn có thể bắt đầu một đơn hàng mới bất cứ lúc nào nhé! 👋');
+        orderCtx.drink = null; orderCtx.isSundae = false; orderCtx.prefs = null; orderCtx.payment = null; orderCtx.cancelReason = null;
+      }, 900);
+    }, 1600);
+  }
+  function receiveOrder(){
+    const card = document.getElementById('driverCard');
+    if(card){
+      const fill = card.querySelector('.ai-progress-bar-fill');
+      if(fill) fill.style.width = '100%';
+      card.querySelectorAll('.ai-progress-steps .step').forEach(s => s.classList.add('done'));
+      const actions = card.querySelector('.ai-order-actions');
+      if(actions) actions.innerHTML = '';
+    }
+    withThinking(()=>{
+      const uid = 'done' + (++sugCounter);
+      appendAICard(`
+        <div class="ai-info-card" id="${uid}">
+          <div class="ai-info-title">🎉 Đơn hàng hoàn tất!</div>
+          <div class="ai-wish-text">Cảm ơn bạn đã ủng hộ Mixue! Chúc bạn có một ngày thật ngọt ngào và mát lạnh như ly nước vừa nhận nhé! 🍧❄️</div>
+          <div class="ai-pref-label" style="margin-bottom:8px;">Đánh giá đơn hàng</div>
+          <div class="ai-rating-stars" id="${uid}-stars">
+            ${[1,2,3,4,5].map(n=>`<button onclick="setRating('${uid}',${n})">★</button>`).join('')}
+          </div>
+          <textarea class="ai-rating-textarea" id="${uid}-feedback" placeholder="Góp ý thêm cho Mixue (không bắt buộc)..."></textarea>
+          <button class="ai-btn-choose" style="width:100%" onclick="submitRating('${uid}')">Gửi đánh giá</button>
+        </div>`);
+    });
+  }
+  function setRating(uid, n){
+    ratingState[uid] = n;
+    document.querySelectorAll('#'+uid+'-stars button').forEach((b,i)=> b.classList.toggle('on', i<n));
+  }
+  function submitRating(uid){
+    const n = ratingState[uid] || 0;
+    toast(n ? 'Cảm ơn bạn đã đánh giá ' + n + ' sao!' : 'Cảm ơn phản hồi của bạn!');
+    pendingStage = null;
+    orderCtx.drink = null; orderCtx.isSundae = false; orderCtx.prefs = null; orderCtx.payment = null;
+    withThinking(()=> appendAIText('Cảm ơn bạn đã đánh giá đơn hàng! Hẹn gặp lại bạn ở đơn hàng tiếp theo nhé 💛'), 450);
+  }
+
+  /* ---------------- voice mode (Web Speech API, tiếng Việt) ---------------- */
+  const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognition = null;
+  let voiceLatestText = '';
+  let voiceCancelled = false;
+
+  function setVoiceCaption(text, placeholder){
+    const cap = document.getElementById('voiceCaption');
+    cap.textContent = text || placeholder || '';
+    cap.style.opacity = text ? '1' : '.55';
+  }
+
+  function hideVoiceBar(){
+    document.getElementById('aiVoiceBar').style.display = 'none';
+    document.getElementById('aiInputBar').style.display = 'flex';
+    setVoiceCaption('', '');
+  }
+
+  function startVoice(){
+    if(!SpeechRecognitionAPI){
+      toast('Trình duyệt này không hỗ trợ nhận dạng giọng nói');
+      return;
+    }
+    document.getElementById('aiInputBar').style.display = 'none';
+    document.getElementById('aiVoiceBar').style.display = 'flex';
+    setVoiceCaption('', 'Đang nghe... hãy nói điều bạn muốn');
+
+    voiceLatestText = '';
+    voiceCancelled = false;
+    recognition = new SpeechRecognitionAPI();
+    recognition.lang = 'vi-VN';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+
+    recognition.onresult = (e) => {
+      let combined = '';
+      for(let i = 0; i < e.results.length; i++){
+        combined += e.results[i][0].transcript;
+      }
+      voiceLatestText = combined.trim();
+      setVoiceCaption(voiceLatestText, 'Đang nghe...');
+    };
+    recognition.onerror = (e) => {
+      if(e.error === 'no-speech' || e.error === 'aborted') return;
+      toast('Không thể nhận dạng giọng nói, vui lòng thử lại');
+      voiceCancelled = true;
+      cancelVoice();
+    };
+    recognition.onend = () => {
+      if(voiceCancelled) return;
+      const text = voiceLatestText;
+      hideVoiceBar();
+      recognition = null;
+      if(text) handleUserMessage(text);
+      else toast('Chưa nghe rõ, vui lòng thử lại');
+    };
+
+    try{ recognition.start(); }
+    catch(err){ toast('Không thể khởi động micro'); voiceCancelled = true; cancelVoice(); }
+  }
+
+  function finishVoice(){
+    // Don't read the transcript synchronously here — stop the engine and let
+    // onend (fired once the final chunk is actually processed) send it.
+    if(recognition){ try{ recognition.stop(); }catch(e){} }
+    else hideVoiceBar();
+  }
+
+  function cancelVoice(){
+    voiceCancelled = true;
+    if(recognition){
+      recognition.onend = null;
+      try{ recognition.stop(); }catch(e){}
+      recognition = null;
+    }
+    hideVoiceBar();
+  }
+  /* ---------------- cart ---------------- */
+  const cart = {};
+  function updateCartBadge(){
+    const total = Object.values(cart).reduce((a,b)=>a+b,0);
+    const badge = document.getElementById('cartBadge');
+    badge.textContent = total;
+    badge.style.display = total > 0 ? 'flex' : 'none';
+  }
+  function addToCart(id){
+    cart[id] = (cart[id]||0) + 1;
+    renderStepper(id);
+    updateCartBadge();
+  }
+  function changeQty(id, delta){
+    cart[id] = Math.max(0, (cart[id]||0) + delta);
+    renderStepper(id);
+    updateCartBadge();
+  }
+  function renderStepper(id){
+    const holder = document.getElementById('qty-' + id);
+    const qty = cart[id] || 0;
+    if(qty <= 0){
+      holder.innerHTML = '<button class="add-btn" onclick="event.stopPropagation();addToCart(\''+id+'\')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>';
+    } else {
+      holder.innerHTML = '<span class="stepper">'
+        + '<button onclick="event.stopPropagation();changeQty(\''+id+'\',-1)">−</button>'
+        + '<span class="qty">'+qty+'</span>'
+        + '<button onclick="event.stopPropagation();changeQty(\''+id+'\',1)">+</button>'
+        + '</span>';
+    }
+  }
+
+  /* ---------------- icy cup illustration ---------------- */
+  function cupSVG(opts){
+    // opts: {cupFill, swirlColor, toppingColor, toppingType}
+    const toppings = {
+      strawberry: '<circle cx="42" cy="46" r="5" fill="#E14B3E"/><circle cx="98" cy="50" r="4" fill="#E14B3E"/><circle cx="70" cy="38" r="3.4" fill="#E14B3E"/><path d="M30 60 Q70 40 110 60" stroke="#E14B3E" stroke-width="3" fill="none" opacity=".7"/>',
+      oreo: '<rect x="34" y="42" width="12" height="12" rx="2" fill="#3B2A22" transform="rotate(12 40 48)"/><rect x="90" y="44" width="12" height="12" rx="2" fill="#3B2A22" transform="rotate(-10 96 50)"/><rect x="62" y="36" width="11" height="11" rx="2" fill="#3B2A22" transform="rotate(6 67 41)"/>',
+      peach: '<circle cx="45" cy="44" r="6" fill="#F2916B"/><circle cx="95" cy="48" r="5.5" fill="#F5A879"/><path d="M32 58 Q70 42 108 58" stroke="#F2916B" stroke-width="3" fill="none" opacity=".7"/>',
+      kiwi: '<circle cx="44" cy="45" r="4" fill="#2E2E2E"/><circle cx="56" cy="40" r="3" fill="#2E2E2E"/><circle cx="90" cy="47" r="4" fill="#2E2E2E"/><circle cx="80" cy="39" r="3" fill="#2E2E2E"/>',
+      grass: '<rect x="30" y="40" width="10" height="10" fill="#2B2B2B" transform="rotate(20 35 45)"/><rect x="95" y="42" width="10" height="10" fill="#2B2B2B" transform="rotate(-15 100 47)"/><rect x="63" y="34" width="9" height="9" fill="#2B2B2B" transform="rotate(8 67 38)"/>'
+    };
+    return '<svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">'
+      + '<rect width="140" height="140" fill="url(#g'+opts.id+')"/>'
+      + '<defs><linearGradient id="g'+opts.id+'" x1="0" y1="0" x2="0" y2="1">'
+      +   '<stop offset="0" stop-color="#4FA6E8"/><stop offset="1" stop-color="#0B63C2"/>'
+      + '</linearGradient></defs>'
+      + '<circle cx="20" cy="100" r="26" fill="#ffffff" opacity=".10"/>'
+      + '<circle cx="120" cy="30" r="20" fill="#ffffff" opacity=".10"/>'
+      + '<path d="M50 130 Q70 100 90 130 Z" fill="' + opts.cupFill + '"/>'
+      + '<path d="M55 100 h30 v30 h-30 Z" fill="' + opts.cupFill + '"/>'
+      + '<path d="M45 100 Q70 58 95 100 Q70 112 45 100Z" fill="' + opts.swirlColor + '"/>'
+      + '<path d="M55 78 Q70 50 85 78 Q70 88 55 78Z" fill="' + opts.swirlColor + '"/>'
+      + (toppings[opts.toppingType] || '')
+      + '<g opacity=".95">'
+      +   '<circle cx="70" cy="118" r="9" fill="#fff"/>'
+      +   '<path d="M70 111l1.6 3.4 3.7.3-2.8 2.4.9 3.6-3.4-2-3.4 2 .9-3.6-2.8-2.4 3.7-.3z" fill="#F2A73A"/>'
+      + '</g>'
+      + '</svg>';
+  }
+
+  function teaSVG(opts){
+    const bits = {
+      strawberry: '<rect x="40" y="30" width="16" height="20" rx="3" fill="#E14B3E"/><rect x="88" y="34" width="16" height="18" rx="3" fill="#E14B3E"/>',
+      kiwi: '<circle cx="46" cy="38" r="9" fill="#8FBF3F"/><circle cx="46" cy="38" r="3" fill="#fff"/><circle cx="94" cy="42" r="8" fill="#8FBF3F"/>',
+      black: '<rect x="42" y="34" width="12" height="12" fill="#2B2B2B" transform="rotate(15 48 40)"/><rect x="86" y="38" width="12" height="12" fill="#2B2B2B" transform="rotate(-12 92 44)"/><rect x="64" y="28" width="11" height="11" fill="#2B2B2B" transform="rotate(8 69 33)"/>'
+    };
+    return '<svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">'
+      + '<rect width="140" height="140" fill="url(#t'+opts.id+')"/>'
+      + '<defs><linearGradient id="t'+opts.id+'" x1="0" y1="0" x2="0" y2="1">'
+      +   '<stop offset="0" stop-color="#4FA6E8"/><stop offset="1" stop-color="#0B63C2"/>'
+      + '</linearGradient></defs>'
+      + '<circle cx="18" cy="95" r="24" fill="#ffffff" opacity=".10"/>'
+      + '<path d="M48 60 h44 v55 a6 6 0 01-6 6 h-32 a6 6 0 01-6-6z" fill="'+opts.liquid+'" opacity=".93"/>'
+      + '<rect x="46" y="55" width="48" height="10" rx="4" fill="#eaf6ff" opacity=".9"/>'
+      + '<rect x="66" y="18" width="6" height="42" fill="#ffffff" opacity=".85"/>'
+      + bits[opts.bitType]
+      + '<g opacity=".95">'
+      +   '<circle cx="70" cy="112" r="8" fill="#fff"/>'
+      +   '<path d="M70 106l1.4 3 3.2.3-2.4 2.1.8 3.1-3-1.7-3 1.7.8-3.1-2.4-2.1 3.2-.3z" fill="#F2A73A"/>'
+      + '</g>'
+      + '</svg>';
+  }
+
+  /* ---------------- product data ---------------- */
+  const kemItems = [
+    {id:'kem1', name:'Lucky sundae dâu tây', price:'25.000 đ', svg:cupSVG({id:1, cupFill:'#F6D9D3', swirlColor:'#FFFFFF', toppingType:'strawberry'})},
+    {id:'kem2', name:'Lucky sundae O-coco', price:'25.000 đ', svg:cupSVG({id:2, cupFill:'#EDE3D8', swirlColor:'#FFFFFF', toppingType:'oreo'})},
+    {id:'kem3', name:'Super sundae đào hồng', price:'25.000 đ', svg:cupSVG({id:3, cupFill:'#FBE0D0', swirlColor:'#FFF4EC', toppingType:'peach'})},
+    {id:'kem4', name:'Sundae kiwi mát lạnh', price:'25.000 đ', svg:cupSVG({id:4, cupFill:'#E6F0D2', swirlColor:'#FFFFFF', toppingType:'kiwi'})}
+  ];
+  const teaItems = [
+    {id:'tea1', name:'Sữa thạch dâu tây', price:'22.000 đ', svg:teaSVG({id:1, liquid:'#F8D3D8', bitType:'strawberry'})},
+    {id:'tea2', name:'Sữa thạch kiwi kiwi', price:'22.000 đ', svg:teaSVG({id:2, liquid:'#F2F6D8', bitType:'kiwi'})},
+    {id:'tea3', name:'Trà sữa thạch đen', price:'25.000 đ', svg:teaSVG({id:3, liquid:'#E7D3B8', bitType:'black'})},
+    {id:'tea4', name:'Trà sữa truyền thống', price:'22.000 đ', svg:teaSVG({id:4, liquid:'#F0E4D0', bitType:'black'})}
+  ];
+
+  function renderProducts(containerId, items){
+    const el = document.getElementById(containerId);
+    el.innerHTML = items.map(p => `
+      <button class="product-card" onclick="soon('Chi tiết sản phẩm')">
+        <span class="product-image">
+          <span class="ice-tag">ICE</span>
+          ${p.svg}
+        </span>
+        <span class="product-info">
+          <span class="product-name">${p.name}</span>
+          <span class="product-bottom">
+            <span class="price">${p.price}</span>
+            <span id="qty-${p.id}"></span>
+          </span>
+        </span>
+      </button>
+    `).join('');
+    items.forEach(p => renderStepper(p.id));
+  }
+  renderProducts('kemScroll', kemItems);
+  renderProducts('teaScroll', teaItems);
+
+  /* ---------------- news data ---------------- */
+  const newsItems = [
+    {
+      title:'Hướng dẫn đặt hàng trên Zalo Mini App Hội Viên Mixue',
+      date:'10:37, 28/08/2025', views:225,
+      color1:'#E2231A', color2:'#F9C74F', label:'MIXUE'
+    },
+    {
+      title:'DÂU TÂY, DÂU TÂY, XUNG QUANH TOÀN LÀ DÂU TÂY 🍓🍓',
+      date:'16:20, 07/08/2025', views:46,
+      color1:'#4E9E5A', color2:'#E14B3E', label:'🍓'
+    },
+    {
+      title:'"MÀU DÂN TỘC SÁNG BỪNG TRÊN GIẤY ĐIỆP"',
+      date:'16:19, 07/08/2025', views:40,
+      color1:'#7A5C3E', color2:'#C79A5B', label:'🖌️'
+    }
+  ];
+  function newsThumb(n){
+    return `<svg viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg">
+      <rect width="200" height="130" fill="${n.color1}"/>
+      <circle cx="165" cy="20" r="30" fill="${n.color2}" opacity=".55"/>
+      <circle cx="20" cy="115" r="26" fill="${n.color2}" opacity=".4"/>
+      <text x="100" y="72" font-size="30" text-anchor="middle" dominant-baseline="middle">${n.label}</text>
+    </svg>`;
+  }
+  document.getElementById('newsGrid').innerHTML = newsItems.map(n => `
+    <button class="news-card" onclick="soon('Chi tiết bài viết')">
+      <span class="news-thumb">${newsThumb(n)}</span>
+      <span class="news-title">${n.title}</span>
+      <span class="news-meta">
+        <span>${n.date}</span>
+        <span class="views">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="2.5"/></svg>
+          ${n.views}
+        </span>
+      </span>
+    </button>
+  `).join('');
+</script>
+</body>
+</html>
